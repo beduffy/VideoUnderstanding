@@ -72,7 +72,7 @@
     var current_img_i = 0;
 
     function start() {
-      loadDataset('result_struct.json');
+      loadDataset('example_images/result_struct.json');
     }
 
     function writeHeader() {
@@ -99,40 +99,44 @@
 
     // pix is index of the sentece
     function visImg(ib, div) {
-      
+
+      console.log(ib);
       // fetch the associated top image
-      var fname = ib.img_path;
-      var img = new Image();
-      img.src = fname;
-      img.onload = function() {
+      if (ib) {
 
-        var width = this.width;
-        var height = this.height;
-        var desired_height = 300;
-        var hscale = desired_height / height;
-        var nwidth = width * hscale; 
+        var fname = 'example_images/' + ib.img_path;
+        var img = new Image();
+        img.src = fname;
+        img.onload = function () {
 
-        // okay now lets render the image
-        var sdiv = div.append("div").attr('class', 'svgdiv');
-        sdiv.append('img').attr('src', fname).attr('height', desired_height).attr('width', nwidth);
+          var width = this.width;
+          var height = this.height;
+          var desired_height = 300;
+          var hscale = desired_height / height;
+          var nwidth = width * hscale;
 
-        // add human predictions
-        if('references' in ib && false) {
-          var dnew = div.append('div').attr('class','hannot annot').style('width', Math.floor(nwidth-6) + 'px');
-          insertAnnot(ib.references[0], dnew);
-        }
-        
-        // add predictions
-        if('candidate' in ib) {
-          var dnew = div.append('div').attr('class','rnnannot annot').style('width', Math.floor(nwidth-6) + 'px');
-          insertAnnot(ib.candidate, dnew);
+          // okay now lets render the image
+          var sdiv = div.append("div").attr('class', 'svgdiv');
+          sdiv.append('img').attr('src', fname).attr('height', desired_height).attr('width', nwidth);
+
+          // add human predictions
+          if ('references' in ib && false) {
+            var dnew = div.append('div').attr('class', 'hannot annot').style('width', Math.floor(nwidth - 6) + 'px');
+            insertAnnot(ib.references[0], dnew);
+          }
+
+          // add predictions
+          if ('candidates' in ib) {
+            var dnew = div.append('div').attr('class', 'rnnannot annot').style('width', Math.floor(nwidth - 6) + 'px');
+            insertAnnot(ib.candidates[0], dnew);
+          }
         }
       }
     }
 
     function insertAnnot(annot, dnew) {
       dnew.append('div').attr('class', 'atxt').text(annot.text);
-      dnew.append('div').attr('class', 'logprob').text('logprob: ' + annot.logprob.toFixed(2));
+      dnew.append('div').attr('class', 'logprob').text('logprob: ' + annot.logprob);//.toFixed(2));
     }
 
     // Handle infinite Scroll
@@ -150,6 +154,7 @@
       // ugly hack to prevent caching below ;(
       var jsonmod = jsonpath + '?sigh=' + Math.floor(Math.random() * 100000);
       $.getJSON(jsonpath, function(data) {
+        console.log(data);
         db = data; // assign to global
         imgperm = randperm(db.imgblobs.length);
         //imgperm = []; for(var i=0;i<db.imgblobs.length;i++) { imgperm.push(i); }
