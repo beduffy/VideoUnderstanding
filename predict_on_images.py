@@ -46,6 +46,7 @@ def main(params):
   blob['imgblobs'] = []
 
   # load the tasks.txt file
+  # TODO FIND EASY WAY TO CALL FILE WITH PROPER root
   root_path = params['root_path']
   img_names = open(os.path.join(root_path, 'tasks.txt'), 'r').read().splitlines()
 
@@ -88,6 +89,7 @@ def main(params):
 
     top_predictions = Ys[0] # take predictions for the first (and only) image we passed in
     print 'Number of name candidates', top_predictions
+    # TODO TIME IT. SEEMS PRETTY FAST THOUGH
     for i in range(0, len(top_predictions)):
 
       top_prediction = top_predictions[i] # these are sorted with highest on top

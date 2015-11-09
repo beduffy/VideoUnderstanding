@@ -1,37 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6e146dfe-72b0-46df-baa9-f8354b26c618" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/video_extraction/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/video_extraction/extract_video_features.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/7EGRMwN.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/7EGRMwN.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/89pUfSc.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/89pUfSc.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/QmG3nS6.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/QmG3nS6.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/UbVIl1e.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/UbVIl1e.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/animals.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/animals.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/cat.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/cat.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/cobra.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/cobra.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/diving.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/diving.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/dogTest.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/dogTest.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/dogdinner.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/dogdinner.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/frog.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/frog.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/gWEHGwf.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/gWEHGwf.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/hole.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/hole.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/japanese.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/japanese.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/jump.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/jump.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/koala.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/koala.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/mic.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/mic.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/pope.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/pope.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/pose.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/pose.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/qjujW6d.png" afterPath="$PROJECT_DIR$/example_images/old_example_images/qjujW6d.png" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/seal.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/seal.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_images/work.jpg" afterPath="$PROJECT_DIR$/example_images/old_example_images/work.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/Video Understanding.iml" afterPath="$PROJECT_DIR$/.idea/Video Understanding.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    <list default="true" id="6e146dfe-72b0-46df-baa9-f8354b26c618" name="Default" comment="More fixes to video extraction. k-means files added. Extract features includes time left and is better.">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/python_features/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/video_extraction/k_means.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tasks.txt" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Readme.md" afterPath="$PROJECT_DIR$/Readme.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/example_images/result_struct.json" afterPath="$PROJECT_DIR$/example_images/result_struct.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/predict_on_images.py" afterPath="$PROJECT_DIR$/predict_on_images.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/python_features/README.md" afterPath="$PROJECT_DIR$/python_features/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/python_features/deploy_features.prototxt" afterPath="$PROJECT_DIR$/python_features/deploy_features.prototxt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/python_features/extract_features.py" afterPath="$PROJECT_DIR$/python_features/extract_features.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/video_extraction/extract_video_features.py" afterPath="$PROJECT_DIR$/video_extraction/extract_video_features.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visualize_result_struct-Speedo.html" afterPath="$PROJECT_DIR$/visualize_result_struct-Speedo.html" />
     </list>
     <ignored path="Video Understanding.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -57,7 +38,18 @@
     <favorites_list name="Video Understanding" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file leaf-file-name="predict_on_images.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/predict_on_images.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-2.0714285">
+              <caret line="53" column="46" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="46" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -85,8 +77,8 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="387" />
-    <option name="y" value="85" />
+    <option name="x" value="241" />
+    <option name="y" value="84" />
     <option name="width" value="1629" />
     <option name="height" value="839" />
   </component>
@@ -205,8 +197,8 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -503,29 +495,29 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="387" y="85" width="1629" height="839" extended-state="0" />
+    <frame x="241" y="84" width="1629" height="839" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30834213" sideWeight="0.48125" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22344998" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3985043" sideWeight="0.49164054" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3019608" sideWeight="0.475" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30411828" sideWeight="0.525" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37124184" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37124184" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3284055" sideWeight="0.49582028" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3985043" sideWeight="0.49164054" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3019608" sideWeight="0.475" order="2" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -726,7 +718,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -734,15 +725,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="30" column="40" selection-start-line="30" selection-start-column="40" selection-end-line="30" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/predict_on_images.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="111" column="46" selection-start-line="111" selection-start-column="46" selection-end-line="111" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -750,7 +732,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -758,7 +739,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="34" selection-end-column="44" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -766,7 +746,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="17" selection-start-line="26" selection-start-column="17" selection-end-line="26" selection-end-column="17" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -774,7 +753,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="4" column="68" selection-start-line="4" selection-start-column="68" selection-end-line="5" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -790,7 +768,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="179" column="33" selection-start-line="179" selection-start-column="33" selection-end-line="179" selection-end-column="33" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -798,7 +775,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="69" column="38" selection-start-line="69" selection-start-column="38" selection-end-line="69" selection-end-column="38" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -814,7 +790,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -842,7 +817,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.4">
           <caret line="0" column="2012" selection-start-line="0" selection-start-column="2012" selection-end-line="0" selection-end-column="2012" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -890,6 +864,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.18987341">
           <caret line="6" column="79" selection-start-line="6" selection-start-column="79" selection-end-line="6" selection-end-column="79" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/predict_on_images.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-2.0714285">
+          <caret line="53" column="46" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="46" />
           <folding />
         </state>
       </provider>

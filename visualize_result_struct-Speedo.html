@@ -72,7 +72,7 @@
     var current_img_i = 0;
 
     function start() {
-      loadDataset('example_images/result_struct.json');
+      loadDataset('example_images/DogsBabies5mins/result_struct.json');
     }
 
     function writeHeader() {
@@ -104,7 +104,7 @@
       // fetch the associated top image
       if (ib) {
 
-        var fname = 'example_images/' + ib.img_path;
+        var fname = 'example_images/DogsBabies5mins/' + ib.img_path;
         var img = new Image();
         img.src = fname;
         img.onload = function () {
@@ -141,6 +141,8 @@
 
     // Handle infinite Scroll
     $(window).scroll(function() {
+
+      //TODO good if its slow to render 1000-5000 images.
       if($(window).scrollTop() > 0.9 * ($(document).height() - $(window).height())) {
         if(current_img_i < imgperm.length) {
           // try to stay 20 images ahead of the scroll
@@ -156,8 +158,8 @@
       $.getJSON(jsonpath, function(data) {
         console.log(data);
         db = data; // assign to global
-        imgperm = randperm(db.imgblobs.length);
-        //imgperm = []; for(var i=0;i<db.imgblobs.length;i++) { imgperm.push(i); }
+        //imgperm = randperm(db.imgblobs.length);
+        imgperm = []; for(var i=0;i<db.imgblobs.length;i++) { imgperm.push(i); }
         writeHeader();
         visSentencesInit();
       });

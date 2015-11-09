@@ -1,6 +1,7 @@
 import sys
 import os.path
 import argparse
+import time
 
 import numpy as np
 from scipy.misc import imread, imresize
@@ -25,8 +26,12 @@ parser.add_argument('--out',
 
 args = parser.parse_args()
 
+print args
+
 if args.caffe:
+    print args.caffe
     caffepath = args.caffe + '/python'
+    print caffepath
     sys.path.append(caffepath)
 
 import caffe
@@ -40,7 +45,7 @@ def predict(in_data, net):
     """
 
     out = net.forward(**{net.inputs[0]: in_data})
-    features = out[net.outputs[0]].squeeze(axis=(2,3))
+    features = out[net.outputs[0]]
     return features
 
 
@@ -61,6 +66,7 @@ def batch_predict(filenames, net):
     Hi, Wi, _ = imread(filenames[0]).shape
     allftrs = np.zeros((Nf, F))
     for i in range(0, Nf, N):
+        start = time.time()
         in_data = np.zeros((N, C, H, W), dtype=np.float32)
 
         batch_range = range(i, min(i+N, Nf))
@@ -91,7 +97,10 @@ def batch_predict(filenames, net):
         for j in range(len(batch_range)):
             allftrs[i+j,:] = ftrs[j,:]
 
-        print 'Done %d/%d files' % (i+len(batch_range), len(filenames))
+        end = time.time()
+        files_left = (len(filenames) - i+len(batch_range)) / 10.0
+        one_batch_time = end - start
+        print 'Done %d/%d files. Took %d seconds. %f minutes left,' % (i+len(batch_range), len(filenames), one_batch_time, (one_batch_time * files_left) / 60.0)
 
     return allftrs
 
@@ -101,16 +110,28 @@ if args.gpu:
 else:
     caffe.set_mode_cpu()
 
+current_dir = os.path.dirname(__file__)
+args.model_def = os.path.join(current_dir, 'deploy_features.prototxt')
+args.model = os.path.join(current_dir, 'VGG_ILSVRC_16_layers.caffemodel')
+
 net = caffe.Net(args.model_def, args.model, caffe.TEST)
-caffe.set_phase_test()
+# caffe.set_phase_test()
 
 filenames = []
+video_dir = 'example_images/DogsBabies5mins/tasks.txt'
+# /home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins1.jpg
+parent_dir = os.path.dirname(current_dir)
+args.files = os.path.join(parent_dir, video_dir)
 
 base_dir = os.path.dirname(args.files)
 with open(args.files) as fp:
     for line in fp:
-        filename = os.path.join(base_dir, line.strip().split()[0])
+        # print line
+        # filename = os.path.join(base_dir, line.strip().split()[0])
+        filename = os.path.join(base_dir, line[:-1])
         filenames.append(filename)
+
+print filenames
 
 allftrs = batch_predict(filenames, net)
 
@@ -119,4 +140,5 @@ if args.out:
     with open(args.out, 'w') as fp:
         pickle.dump(allftrs, fp)
 
+# TODO save vgg_feats to proper folder. Understand it before pickle dumping it
 scipy.io.savemat(os.path.join(base_dir, 'vgg_feats.mat'), mdict =  {'feats': np.transpose(allftrs)})
