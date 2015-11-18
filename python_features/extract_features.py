@@ -9,6 +9,9 @@ import scipy.io
 
 import cPickle as pickle
 
+import matplotlib.pyplot as plt
+# %matplotlib inline
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--caffe',
                     help='path to caffe installation')
@@ -88,7 +91,7 @@ def batch_predict(filenames, net):
             im = np.transpose(im, (2, 0, 1))
             batch_images[j,:,:,:] = im
 
-        # insert into correct place
+        # inserhttp://web.engr.illinois.edu/~slazebni/spring14/lec24_cnn.pdft into correct place
         in_data[0:len(batch_range), :, :, :] = batch_images
 
         # predict features
@@ -111,14 +114,21 @@ else:
     caffe.set_mode_cpu()
 
 current_dir = os.path.dirname(__file__)
+
+# FOR FEATURES
 args.model_def = os.path.join(current_dir, 'deploy_features.prototxt')
+# FOR CLASSIFICATION
+args.model_def = os.path.join(current_dir, 'deploy_classification.prototxt')
+
 args.model = os.path.join(current_dir, 'VGG_ILSVRC_16_layers.caffemodel')
 
 net = caffe.Net(args.model_def, args.model, caffe.TEST)
 # caffe.set_phase_test()
 
 filenames = []
+#
 video_dir = 'example_images/DogsBabies5mins/tasks.txt'
+video_dir = 'example_images/test_dataset/tasks.txt'
 # /home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins1.jpg
 parent_dir = os.path.dirname(current_dir)
 args.files = os.path.join(parent_dir, video_dir)
@@ -133,7 +143,43 @@ with open(args.files) as fp:
 
 print filenames
 
+classes = {}
+classes_path = os.path.join(parent_dir, 'example_images/test_dataset/classes.txt')
+with open(classes_path) as classes_file:
+    for index, line in enumerate(classes_file):
+        #print index, line
+        classes[str(index)] = line
+
+# for key, cls in classes.iteritems():
+#     print key, cls
+
+print 'Number of classes: ', len(classes)
+
 allftrs = batch_predict(filenames, net)
+
+highest_results = []
+
+for i in allftrs:
+    for index, j in enumerate(i):
+        if j > 0.001:
+            highest_results.append({'index' : index, 'prob' : j})
+            #print "index: ", index, " number: ", j
+
+for result in highest_results:
+    print result
+
+
+imagenet_labels_filename = '/home/ben/Downloads/caffe-master/data/ilsvrc12/synset_words.txt'
+labels = np.loadtxt(imagenet_labels_filename, str, delimiter='\t')
+
+plt.imshow(transformer.deprocess('data', net.blobs['data'].data[0]))
+
+top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
+print labels[top_k]
+
+print [(k, v.data.shape) for k, v in net.blobs.items()]
+print
+print [(k, v[0].data.shape) for k, v in net.params.items()]
 
 if args.out:
     # store the features in a pickle file

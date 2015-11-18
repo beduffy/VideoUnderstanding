@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+
+	<title>Horizontally Scrolling Site from CSS-Tricks</title>
+
+	<link rel="stylesheet" href="video_results.css">
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="jquery.mousewheel.js"></script>
+
+</head>
+
+<body>
+
+	<h1>Horizontally Scrolling Site</h1>
+	<div id="page-wrap">
+
+		<!--<div class="frame">-->
+			<!--<h2>Post Title Example One</h2>-->
+
+			<!--<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Suspendisse aliquet arcu a ipsum. Nunc arcu est, pulvinar vitae, consectetuer ac, pellentesque interdum, augue. Fusce iaculis nulla et sapien. Aliquam erat volutpat. Etiam iaculis turpis nec libero. Nam adipiscing ullamcorper quam. Pellentesque erat. Sed hendrerit. Duis id nisl. Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.</p>-->
+
+		<!--</div>-->
+
+		<!--<div class="frame">-->
+			<!--<h2>Post Title Example Two</h2>-->
+		<!--</div>-->
+	</div>
+
+</body>
+
+<script>
+	// Global Variables
+	var scrollRate = 1000;
+
+	$(function() {
+		$("#page-wrap").wrapInner("<table cellspacing='30'><tr>");
+		loadDataset('example_images/DogsBabies5mins/result_struct.json');
+
+		$("body").mousewheel(function(event, delta) {
+			this.scrollLeft -= (delta * scrollRate);
+			event.preventDefault();
+		});
+	});
+
+	// Data Loading
+    function loadDataset(jsonpath) {
+		$.getJSON(jsonpath, function(data) {
+			console.log(data);
+
+			var $pageWrap = $("#page-wrap");
+
+			var imageDirectory = "example_images/DogsBabies5mins/";
+			for (var i = 0; i < data.imgblobs.length; i++) {
+				var imagePath = imageDirectory + data.imgblobs[i].img_path;
+				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
+						"<div class='description'>" + data.imgblobs[i].candidates[0].text +  "</div> "+
+						"</div></td>";
+
+
+				//TODO IDEAL JSON FORMAT
+				/*
+				var description = "";
+				for (var j = 0; j < data.imgblobs[j].descriptions.length; j++) {
+					description += data.imgblobs[j].descriptions[j];
+				}
+				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
+					"<div class='description'>" + data.imgblobs[i].candidates[0].text +  "</div> "+
+					"</div></td>";
+				*/
+
+				//var htmlString = "<td><div class='frame' > hey </div></td>";
+				$pageWrap.append(htmlString);
+			}
+
+			/*writeHeader();
+			visSentencesInit();*/
+      });
+    }
+</script>
+
+</html>
