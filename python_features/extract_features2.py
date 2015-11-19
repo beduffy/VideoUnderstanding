@@ -83,7 +83,9 @@ def vis_square(data, padsize=1, padval=0):
     data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
     data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
 
+    plt.figure()
     plt.imshow(data)
+    plt.show()
 
 # the parameters are a list of [weights, biases]
 filters = net.params['conv1'][0].data

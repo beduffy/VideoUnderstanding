@@ -1,2 +1,4 @@
 *.pyc
 cv/*.p
+/.idea/
+.idea/workspace.xml
