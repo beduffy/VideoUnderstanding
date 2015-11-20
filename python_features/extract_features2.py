@@ -44,11 +44,7 @@ plt.imshow(transformer.deprocess('data', net.blobs['data'].data[0]))
 
 # load labels
 imagenet_labels_filename = caffe_root + 'data/ilsvrc12/synset_words.txt'
-try:
-    labels = np.loadtxt(imagenet_labels_filename, str, delimiter='\t')
-except:
-    # !../data/ilsvrc12/get_ilsvrc_aux.sh
-    labels = np.loadtxt(imagenet_labels_filename, str, delimiter='\t')
+labels = np.loadtxt(imagenet_labels_filename, str, delimiter='\t')
 
 # sort top k predictions from softmax output
 top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
@@ -117,12 +113,15 @@ plt.subplot(2, 1, 1)
 plt.plot(feat.flat)
 plt.subplot(2, 1, 2)
 _ = plt.hist(feat.flat[feat.flat > 0], bins=100)
+plt.show()
 
 feat = net.blobs['fc7'].data[0]
 plt.subplot(2, 1, 1)
 plt.plot(feat.flat)
 plt.subplot(2, 1, 2)
 _ = plt.hist(feat.flat[feat.flat > 0], bins=100)
+plt.show()
 
 feat = net.blobs['prob'].data[0]
 plt.plot(feat.flat)
+plt.show()
