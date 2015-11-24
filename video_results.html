@@ -13,6 +13,12 @@
 
 </head>
 
+<style>
+	rect {
+		fill: steelblue;
+	}
+</style>
+
 <body>
 
 	<h1>Horizontally Scrolling Site</h1>
@@ -22,7 +28,11 @@
 			<!--<h2>Post Title Example One</h2>-->
 
 			<!--<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Suspendisse aliquet arcu a ipsum. Nunc arcu est, pulvinar vitae, consectetuer ac, pellentesque interdum, augue. Fusce iaculis nulla et sapien. Aliquam erat volutpat. Etiam iaculis turpis nec libero. Nam adipiscing ullamcorper quam. Pellentesque erat. Sed hendrerit. Duis id nisl. Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.</p>-->
-
+		<svg>
+			<g transform="translate(0,0)">
+				<rect width="400" height="40"></rect>
+			</g>
+		</svg>
 	</div>
 
 </body>
@@ -30,19 +40,50 @@
 <script>
 	// Global Variables
 	var scrollRate = 1000;
-	var imageDirectory = 'example_images/DogsBabies5mins/';
-	imageDirectory = 'example_images/old_example_images/'
+	var imageDirectory;
+	//var imageDirectory = 'example_images/DogsBabies5mins/';
+	//imageDirectory = 'example_images/old_example_images/'
 
+
+	var QueryString = function () {
+	  // This function is anonymous, is executed immediately and
+	  // the return value is assigned to QueryString!
+	  var query_string = {};
+	  var query = window.location.search.substring(1);
+	  var vars = query.split("&");
+	  for (var i=0;i<vars.length;i++) {
+		var pair = vars[i].split("=");
+			// If first entry with this name
+		if (typeof query_string[pair[0]] === "undefined") {
+		  query_string[pair[0]] = decodeURIComponent(pair[1]);
+			// If second entry with this name
+		} else if (typeof query_string[pair[0]] === "string") {
+		  var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+		  query_string[pair[0]] = arr;
+			// If third or later entry with this name
+		} else {
+		  query_string[pair[0]].push(decodeURIComponent(pair[1]));
+		}
+	  }
+		return query_string;
+	}();
 
 	$(function() {
 		$("#page-wrap").wrapInner("<table cellspacing='30'><tr>");
+
+		console.log(QueryString.video);
+		var videoName = QueryString.video;
+		imageDirectory = 'example_images/' + videoName + '/';
 		var result_file_path = imageDirectory + 'result_struct.json';
 //		loadDataset(result_file_path);
 		loadDataset2(result_file_path);
 		$("body").mousewheel(function(event, delta) {
+			//TODO fix when it hits the end
 			this.scrollLeft -= (delta * scrollRate);
 			event.preventDefault();
 		});
+
+
 	});
 
 	// Data Loading
@@ -90,16 +131,29 @@
 			for (var i = 0; i < data.images.length; i++) {
 				//TODO wrap text description within frame width.
 				var imagePath = imageDirectory + data.images[i].name;
-				//imagePath = data.images[i].path;
+
+				var fullBarWidth = 400;
+				var svgString = '<svg><g transform="translate(0,0)">';
+				var widthTravelled = 0;
+				for(var j = 0; j < 3; j++) {
+					var width = data.images[i].kmeans[j][0] * 400;
+					var fillString = 'style="fill:rgb(' + data.images[i].kmeans[j][1][0] + ',' + data.images[i].kmeans[j][1][1] + ',' + data.images[i].kmeans[j][1][2] + ')"';
+
+					svgString += '<rect x=' + widthTravelled + ' width="' + width + '" height="40"' + fillString + '></rect>';
+					widthTravelled += width;
+				}
+				svgString += '</g></svg>';
 
 				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
-						"<div class='description'>" + data.images[i].kmeans + "</div> " +
+						svgString +//+ "<div class='description'>"  + "</div> " +
 						"</div></td>";
 
 				$pageWrap.append(htmlString);
 			}
 		});
 	}
+
+
 </script>
 
 </html>

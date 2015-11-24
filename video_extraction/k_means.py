@@ -51,14 +51,14 @@ def kmeans_image_show(image_path, clusters=3):
     plt.imshow(bar)
     plt.show()
 
-def kmeans_image(image_path, clusters=3):
+def kmeans_image(image_path, clt):
     image = cv2.imread(image_path)
+    # TODO CHECK IF OK TO REMOVE? Matlab needs rbg. but order might be different
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     image = image.reshape((image.shape[0] * image.shape[1], 3))
 
     # cluster the pixel intensities
-    clt = KMeans(n_clusters = clusters)
     clt.fit(image)
 
     # build a histogram of clusters and then create a figure
@@ -81,10 +81,12 @@ def extract_batch_image_kmeans(directory_name, clusters=3):
         for line in fp:
             filenames.append(line[:-1])
 
+    clt = KMeans(n_clusters = clusters)
+
     json_struct = {'images' : []}
     for image_name in filenames:
         image_path = os.path.join(image_directory_path, image_name)
-        percentage_color_info = kmeans_image(image_path)
+        percentage_color_info = kmeans_image(image_path, clt)
         print percentage_color_info
         json_struct['images'].append({'name' : image_name, 'kmeans': percentage_color_info})
 
@@ -98,4 +100,5 @@ example_images = os.path.join(parent_dir, 'example_images')
 
 # extract_batch_image_kmeans('DogsBabies5mins')
 extract_batch_image_kmeans('old_example_images')
+# kmeans_image_show('/home/ben/VideoUnderstanding/example_images/test_dataset/dog2.jpg')
 

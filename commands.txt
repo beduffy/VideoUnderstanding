@@ -1,4 +1,6 @@
 python -m SimpleHTTPServer 8123
 
+http://localhost:8123/video_results.html?video=old_example_images
+
 http://localhost:8123/visualize_result_struct.html
 http://localhost:8123/video_results.html
