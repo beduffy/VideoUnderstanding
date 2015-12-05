@@ -21,18 +21,13 @@
 
 <body>
 
-	<h1>Horizontally Scrolling Site</h1>
+	<h1>Video</h1>
 	<div id="page-wrap">
 
 		<!--<div class="frame">-->
 			<!--<h2>Post Title Example One</h2>-->
 
 			<!--<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Suspendisse aliquet arcu a ipsum. Nunc arcu est, pulvinar vitae, consectetuer ac, pellentesque interdum, augue. Fusce iaculis nulla et sapien. Aliquam erat volutpat. Etiam iaculis turpis nec libero. Nam adipiscing ullamcorper quam. Pellentesque erat. Sed hendrerit. Duis id nisl. Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.Cras arcu mauris, mollis vel, convallis non, elementum a, tortor. Donec ac est eget elit consequat sollicitudin. In id odio quis tortor volutpat mollis. Nulla iaculis lobortis est. Pellentesque in elit vitae nulla tempus euismod. Nam non erat in lacus rutrum malesuada. Donec commodo purus sed quam posuere eleifend. Nam accumsan.</p>-->
-		<svg>
-			<g transform="translate(0,0)">
-				<rect width="400" height="40"></rect>
-			</g>
-		</svg>
 	</div>
 
 </body>
@@ -43,7 +38,7 @@
 	var imageDirectory;
 	//var imageDirectory = 'example_images/DogsBabies5mins/';
 	//imageDirectory = 'example_images/old_example_images/'
-
+	var globalData;
 
 	var QueryString = function () {
 	  // This function is anonymous, is executed immediately and
@@ -125,7 +120,7 @@
 	function loadDataset2(jsonpath) {
 		$.getJSON(jsonpath, function(data) {
 			console.log(data);
-
+			globalData = data;
 			var $pageWrap = $("#page-wrap");
 
 			for (var i = 0; i < data.images.length; i++) {
@@ -135,6 +130,7 @@
 				var fullBarWidth = 400;
 				var svgString = '<svg><g transform="translate(0,0)">';
 				var widthTravelled = 0;
+				//TODO CHANGE 3 TO LENGTH
 				for(var j = 0; j < 3; j++) {
 					var width = data.images[i].kmeans[j][0] * 400;
 					var fillString = 'style="fill:rgb(' + data.images[i].kmeans[j][1][0] + ',' + data.images[i].kmeans[j][1][1] + ',' + data.images[i].kmeans[j][1][2] + ')"';
@@ -144,8 +140,16 @@
 				}
 				svgString += '</g></svg>';
 
+				//todo fix scene desc
+				sceneResultsString = "<div class='scene_desc'>";
+				for (var a = 0; a < 5; a++) {
+					label_prob = data.images[i].scene_results.scene_results1[a].label + ' : ' + data.images[i].scene_results.scene_results1[a].probability;
+					sceneResultsString += "<div style='font-size: large;'>" + label_prob + "</div>";
+				}
+				sceneResultsString += "</div";
+
 				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
-						svgString +//+ "<div class='description'>"  + "</div> " +
+						svgString + sceneResultsString +//+ "<div class='description'>"  + "</div> " +
 						"</div></td>";
 
 				$pageWrap.append(htmlString);
