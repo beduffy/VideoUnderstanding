@@ -4,3 +4,6 @@ http://localhost:8123/video_results.html?video=old_example_images
 
 http://localhost:8123/visualize_result_struct.html
 http://localhost:8123/video_results.html
+
+python video_extraction/preprocess_video.py --source /home/ben/VideoUnderstanding/example_images/AnimalsBabies5mins/AnimalsBabies5mins.mp4 --dest example_images/AnimalsBabies5mins/short.avi --command shrink --verbose
+python video_extraction/filmstrip.py -s /home/ben/VideoUnderstanding/example_images/AnimalsBabies5mins/AnimalsBabies5mins.mp4 -d example_images/AnimalsBabies5mins -n 'shortened.mp4' -v

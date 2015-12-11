@@ -16,3 +16,8 @@
 #  // Finally write json_struct to file and run my HTML page to display the results. Eventually I could
 # display the results in OpenCV as well if needed. The difficult part is filling the json_struct.
 # }
+
+#TODO put images in folder inside folder e.g. AnimalsBabies5mins/images
+
+def extract_video_features(video_path):
+    json_struct = {}
