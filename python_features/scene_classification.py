@@ -100,6 +100,9 @@ all_scene_models = []
 all_scene_models.append(places205model)
 all_scene_models.append(googlenet205model)
 
+
+batch_scene_classification('old_example_images', all_scene_models)
+
 # batch_scene_classification('old_example_images', places205model['prototxt'], places205model['caffemodel'])
 
 # batch_scene_classification('old_example_images', '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel')
