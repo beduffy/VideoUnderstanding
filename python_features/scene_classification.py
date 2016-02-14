@@ -62,7 +62,7 @@ def classify_scene(net, image_path):
     transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
     # set net to batch size of 50
-    net.blobs['data'].reshape(50,3,227,227)
+    # net.blobs['data'].reshape(50,3,227,227)
 
     # todo dot dot dot operator?????
     #net.blobs['data'].data[...] = transformer.preprocess('data', caffe.io.load_image(caffe_root + 'examples/images/cat.jpg'))

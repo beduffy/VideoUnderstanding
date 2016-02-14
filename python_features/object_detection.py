@@ -1,6 +1,8 @@
 # !mkdir -p _temp
-# !echo `pwd`/images/fish-bike.jpg > _temp/det_input.txt
+# !echo `pwd`/images/fish-bike.jpg > _temp/det_input.txt  #######/home/ben/Downloads/caffe-master/python  /home/ben/Downloads/caffe-master/python/detect.py
 # !../python/detect.py --crop_mode=selective_search --pretrained_model=../models/bvlc_reference_rcnn_ilsvrc13/bvlc_reference_rcnn_ilsvrc13.caffemodel --model_def=../models/bvlc_reference_rcnn_ilsvrc13/deploy.prototxt --gpu --raw_scale=255 _temp/det_input.txt _temp/det_output.h5
+# actual =
+#./home/ben/Downloads/caffe-master/python/detect.py --crop_mode=selective_search --pretrained_model=/home/ben/Downloads/caffe-master/models/bvlc_reference_rcnn_ilsvrc13/bvlc_reference_rcnn_ilsvrc13.caffemodel --model_def=bvlc_reference_rcnn_ilsvrc13/deploy.prototxt --raw_scale=255 _temp/det_input.txt _temp/det_output.h5
 
 import numpy as np
 import pandas as pd

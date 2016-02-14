@@ -33,8 +33,6 @@
 	// Global Variables
 	var scrollRate = 1000;
 	var imageDirectory;
-	//var imageDirectory = 'example_images/DogsBabies5mins/';
-	//imageDirectory = 'example_images/old_example_images/'
 	var globalData;
 
 	var QueryString = function () {
@@ -138,15 +136,36 @@
 				svgString += '</g></svg>';
 
 				//todo fix scene desc
-				sceneResultsString = "<div class='scene_desc'>";
+				var sceneResultsString = "<div class='scene_desc'>";
 				for (var a = 0; a < 5; a++) {
-					label_prob = data.images[i].scene_results.scene_results1[a].label + ' : ' + data.images[i].scene_results.scene_results1[a].probability;
+					var label_prob = data.images[i].scene_results.scene_results1[a].label + ' : ' + data.images[i].scene_results.scene_results1[a].probability;
 					sceneResultsString += "<div style='font-size: large;'>" + label_prob + "</div>";
 				}
 				sceneResultsString += "</div";
 
+				var sceneResultsString2 = "<div class='scene_desc'>";
+				for (var a = 0; a < 5; a++) {
+					var label_prob = data.images[i].scene_results.scene_results2[a].label + ' : ' + data.images[i].scene_results.scene_results2[a].probability;
+					sceneResultsString2 += "<div style='font-size: large;'>" + label_prob + "</div>";
+				}
+				sceneResultsString2 += "</div";
+
+                var weightSceneResultsString = "<div class='scene_desc'>";
+                for (var a = 0; a < 5; a++) {
+                    var label_prob1 = {"label": data.images[i].scene_results.scene_results1[a].label, "prob" : data.images[i].scene_results.scene_results1[a].probability};
+                    for (var b = 0; b < 5; b++) {
+                        var label_prob2 = {"label": data.images[i].scene_results.scene_results2[b].label, "prob" : data.images[i].scene_results.scene_results2[b].probability};
+                        if (label_prob2.label === label_prob1.label) {
+                            var new_label_prob = label_prob1.label + ' : ' + (label_prob2.prob + label_prob1.prob);
+					        weightSceneResultsString += "<div style='font-size: large;'>" + new_label_prob + "</div>";
+                            break;
+                        }
+                    }
+                }
+                weightSceneResultsString += "</div";
+
 				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
-						svgString + sceneResultsString +//+ "<div class='description'>"  + "</div> " +
+						svgString + sceneResultsString + "<br><br>" + sceneResultsString2 + "<br>" + weightSceneResultsString + "<br><br>" +//+ "<div class='description'>"  + "</div> " +
 						"</div></td>";
 
 				$pageWrap.append(htmlString);
