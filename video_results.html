@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 
 	<!--TODO change -->
-	<title>Horizontally Scrolling Site from CSS-Tricks</title>
+	<title>Video Understanding</title>
 
 	<link rel="stylesheet" type="text/css" href="video_results.css">
 
@@ -18,13 +18,45 @@
 
 </head>
 
-
+<script src="js/handlebars-v4.0.5.js"></script>
 
 <body>
+<!--TODO make header bigger and descripts smaller and have different classes for all. -->
+	<div id="header">
+		<h1 id="video-title"></h1>
+		<script id="header-template" type="text/x-handlebars-template">
+            <div class="description">
+			    <div>Number of frames: {{info.framecount}}</div>
+                <div>Number of images:  {{info.num_images}}</div>
+            </div>
+		</script>
+	</div>
 
-	<h1>Video</h1>
+
 	<div id="page-wrap">
-
+		<script id="image-template" type="text/x-handlebars-template">
+			{{#each images}}
+				<td>
+					<div class="frame">
+						<img class="img_frame" src="{{addDirectory image_name}}">
+						<div class="description">
+                            <div>Frame Number: {{frame_number}}</div>
+                            <div class='scene_desc'>
+                                {{#each scene_results.scene_results1}}
+                                    <div>{{label}} : {{probability}}</div>
+                                {{/each}}
+                            </div>
+                            <br>
+                            <div class='scene_desc'>
+                                {{#each scene_results.scene_results2}}
+                                    <div>{{label}} : {{probability}}</div>
+                                {{/each}}
+                            </div>
+                        </div>
+					</div>
+				</td>"
+			{{/each}}
+		</script>
 	</div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -60,56 +92,43 @@
 
 	$(function() {
 		$("#page-wrap").wrapInner("<table cellspacing='30'><tr>");
-
-		console.log(QueryString.video);
 		var videoName = QueryString.video;
+		$('#video-title').text(videoName);
+
 		imageDirectory = 'example_images/' + videoName + '/';
-		var result_file_path = imageDirectory + 'result_struct.json';
-//		loadDataset(result_file_path);
-		loadDataset2(result_file_path);
+		var result_file_path = imageDirectory + '/metadata/result_struct.json';
+		loadDataset(result_file_path);
+
 		$("body").mousewheel(function(event, delta) {
 			//TODO fix when it hits the end
 			this.scrollLeft -= (delta * scrollRate);
 			event.preventDefault();
 		});
-
-
 	});
 
 	// Data Loading
     function loadDataset(jsonpath) {
 		$.getJSON(jsonpath, function(data) {
 			console.log(data);
-
+            console.log("Number of Images:", data.images.length);
+			globalData = data;
 			var $pageWrap = $("#page-wrap");
+			imageDirectory = imageDirectory + 'images/full/';
 
-			for (var i = 0; i < data.imgblobs.length; i++) {
-				//TODO wrap text description within frame width.
-				var imagePath = imageDirectory + data.imgblobs[i].img_path;
-				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
-						"<div class='description'>" + data.imgblobs[i].candidates[0].text +  "</div> "+
-						"</div></td>";
+			var headerScript = $("#header-template").html();
+			var headerTemplate = Handlebars.compile(headerScript);
+			var compiledHtml = headerTemplate(data);
+			$("#header").append(compiledHtml);
 
+			Handlebars.registerHelper('addDirectory', function(image_name) {
+				return imageDirectory + image_name;
+			});
 
-
-				//TODO IDEAL JSON FORMAT
-				/*
-				var description = "";
-				for (var j = 0; j < data.imgblobs[j].descriptions.length; j++) {
-					description += data.imgblobs[j].descriptions[j];
-				}
-				var htmlString = "<td><div class='frame' > <img class='img_frame' src='" + imagePath + "' > " +
-					"<div class='description'>" + data.imgblobs[i].candidates[0].text +  "</div> "+
-					"</div></td>";
-				*/
-
-				//var htmlString = "<td><div class='frame' > hey </div></td>";
-				$pageWrap.append(htmlString);
-			}
-
-			/*writeHeader();
-			visSentencesInit();*/
-      });
+			var theTemplateScript = $("#image-template").html();
+			var theTemplate = Handlebars.compile(theTemplateScript);
+			var theCompiledHtml = theTemplate(data);
+			$pageWrap.append(theCompiledHtml);
+		});
     }
 
 	function loadDataset2(jsonpath) {
@@ -172,7 +191,6 @@
 			}
 		});
 	}
-
 
 </script>
 
