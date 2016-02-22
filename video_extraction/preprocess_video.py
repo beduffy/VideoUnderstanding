@@ -126,3 +126,7 @@ elif args.command == "roi":
     points = [int(x) for x in args.rect.split(",")]
     points = group(points, 2)
     extractROI(args.source, args.dest, points, args.verbose)
+
+
+# didn't work?
+# python preprocess_video.py --source /home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4 --dest /home/ben/VideoUnderstanding/example_images/Animals6mins/ --command "shrink"

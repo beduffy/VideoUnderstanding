@@ -19,6 +19,8 @@ def getInfo(sourcePath):
         "height": int(cap.get(cv.CV_CAP_PROP_FRAME_HEIGHT)),
         "codec": int(cap.get(cv.CV_CAP_PROP_FOURCC))
     }
+    print "Video information: ", info
+
     cap.release()
     return info
 
@@ -116,6 +118,8 @@ def calculateFrameStats(sourcePath, verbose=False, after_frame=0):
             data["frame_info"].append(frame_info)
 
             if verbose:
+                text = "frame_no: " + str(frame_number) + " diff: " + str(diffMag)
+                cv2.putText(diff, text, (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
                 cv2.imshow('diff', diff)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
@@ -155,8 +159,7 @@ def calculateFrameStats(sourcePath, verbose=False, after_frame=0):
 #
 # Take an image and write it out at various sizes.
 #
-# TODO: Create output directories if they do not exist.
-#
+# TODO: BEN KEEP AROUND TO EVENTUALLY LOOK AT ALL SMALL IMAGES OF VIDEO FROM AFAR AND SEE IF IT IS EASY TO SPOT SCENE CHANGES FOR A HUMAN
 def writeImagePyramid(destPath, name, seqNumber, image):
     fullPath = os.path.join(destPath, "full", name + "-" + str(seqNumber) + ".png")
     halfPath = os.path.join(destPath, "half", name + "-" + str(seqNumber) + ".png")
@@ -174,8 +177,6 @@ def writeImagePyramid(destPath, name, seqNumber, image):
     cv2.imwrite(quarterPath, qImage)
     cv2.imwrite(eigthPath, eImage)
     cv2.imwrite(sixteenthPath, sImage)
-
-
 
 #
 # Selects a set of frames as key frames (frames that represent a significant difference in
@@ -204,7 +205,9 @@ def detectScenes(sourcePath, destPath, data, name, verbose=False):
 
 
         if frame != None:
-            writeImagePyramid(destDir, name, fi["frame_number"], frame)
+            #writeImagePyramid(destDir, name, fi["frame_number"], frame)
+            fullPath = os.path.join(destDir, "full", name + "-" + str(fi["frame_number"]) + ".png")
+            cv2.imwrite(fullPath, frame)
 
             if verbose:
                 cv2.imshow('extract', frame)
@@ -222,10 +225,10 @@ def makeOutputDirs(path):
         #fi any folder along the path exists. fix
         os.makedirs(os.path.join(path, "metadata"))
         os.makedirs(os.path.join(path, "images", "full"))
-        os.makedirs(os.path.join(path, "images", "half"))
-        os.makedirs(os.path.join(path, "images", "quarter"))
-        os.makedirs(os.path.join(path, "images", "eigth"))
-        os.makedirs(os.path.join(path, "images", "sixteenth"))
+        # os.makedirs(os.path.join(path, "images", "half"))
+        # os.makedirs(os.path.join(path, "images", "quarter"))
+        # os.makedirs(os.path.join(path, "images", "eigth"))
+        # os.makedirs(os.path.join(path, "images", "sixteenth"))
     except OSError as exc: # Python >2.5
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
@@ -264,3 +267,42 @@ keyframe_info_fp = os.path.join(args.dest, "metadata", args.name + "-keyframe-me
 with open(keyframe_info_fp, 'w') as f:
     data_json_str = json.dumps(keyframeInfo, indent=4)
     f.write(data_json_str)
+
+
+# python filmstrip.py --source /home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4 --dest /home/ben/VideoUnderstanding/example_images/Animals6mins/ --name Animals6mins --verbose
+# TODO understand after frame.
+
+def main_separate_scenes(video_path, verbose=False):
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-s','--source', help='source file', required=True)
+    parser.add_argument('-d', '--dest', help='dest folder', required=True)
+    parser.add_argument('-n', '--name', help='image sequence name', required=True)
+    parser.add_argument('-a','--after_frame', help='after frame', default=0)
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.set_defaults(verbose=False)
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        info = getInfo(args.source)
+        print("Source Info: ", info)
+
+    makeOutputDirs(args.dest)
+
+    # Run the extraction
+    data = calculateFrameStats(args.source, args.verbose, int(args.after_frame))
+    data = detectScenes(args.source, args.dest, data, args.name, args.verbose)
+    keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info]
+
+    # Write out the results
+    data_fp = os.path.join(args.dest, "metadata", args.name + "-meta.json")
+    with open(data_fp, 'w') as f:
+        data_json_str = json.dumps(data, indent=4)
+        f.write(data_json_str)
+
+    keyframe_info_fp = os.path.join(args.dest, "metadata", args.name + "-keyframe-meta.json")
+    with open(keyframe_info_fp, 'w') as f:
+        data_json_str = json.dumps(keyframeInfo, indent=4)
+        f.write(data_json_str)
+    pass
