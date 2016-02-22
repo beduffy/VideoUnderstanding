@@ -155,8 +155,6 @@ def calculateFrameStats(sourcePath, verbose=False, after_frame=0):
     return data
 
 
-
-#
 # Take an image and write it out at various sizes.
 #
 # TODO: BEN KEEP AROUND TO EVENTUALLY LOOK AT ALL SMALL IMAGES OF VIDEO FROM AFAR AND SEE IF IT IS EASY TO SPOT SCENE CHANGES FOR A HUMAN
@@ -184,11 +182,12 @@ def writeImagePyramid(destPath, name, seqNumber, image):
 # number of pixels that changed from the previous frame are more than 1.85 standard deviations
 # times from the mean number of changed pixels across all interframe changes.
 #
-def detectScenes(sourcePath, destPath, data, name, verbose=False):
+def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
     destDir = os.path.join(destPath, "images")
 
     # TODO make sd multiplier externally configurable
-    diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
+    # diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
+    diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
 
     cap = cv2.VideoCapture(sourcePath)
     for index, fi in enumerate(data["frame_info"]):
@@ -206,14 +205,20 @@ def detectScenes(sourcePath, destPath, data, name, verbose=False):
 
         if frame != None:
             #writeImagePyramid(destDir, name, fi["frame_number"], frame)
-            fullPath = os.path.join(destDir, "full", name + "-" + str(fi["frame_number"]) + ".png")
+            image_name = name + "-" + str(fi["frame_number"]) + ".png"
+            fullPath = os.path.join(destDir, "full", image_name)
             cv2.imwrite(fullPath, frame)
+
+            print fullPath
+
+            json_struct['images'].append({'image_name': image_name, 'frame_number': fi["frame_number"]})
 
             if verbose:
                 cv2.imshow('extract', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
+    json_struct['info']['num_images'] = len(json_struct['images'])
     cap.release()
     cv2.destroyAllWindows()
     return data
@@ -234,75 +239,52 @@ def makeOutputDirs(path):
             pass
         else: raise
 
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument('-s','--source', help='source file', required=True)
-parser.add_argument('-d', '--dest', help='dest folder', required=True)
-parser.add_argument('-n', '--name', help='image sequence name', required=True)
-parser.add_argument('-a','--after_frame', help='after frame', default=0)
-parser.add_argument('-v', '--verbose', action='store_true')
-parser.set_defaults(verbose=False)
-
-args = parser.parse_args()
-
-if args.verbose:
-    info = getInfo(args.source)
-    print("Source Info: ", info)
-
-makeOutputDirs(args.dest)
-
-# Run the extraction
-data = calculateFrameStats(args.source, args.verbose, int(args.after_frame))
-data = detectScenes(args.source, args.dest, data, args.name, args.verbose)
-keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info]
-
-# Write out the results
-data_fp = os.path.join(args.dest, "metadata", args.name + "-meta.json")
-with open(data_fp, 'w') as f:
-    data_json_str = json.dumps(data, indent=4)
-    f.write(data_json_str)
-
-keyframe_info_fp = os.path.join(args.dest, "metadata", args.name + "-keyframe-meta.json")
-with open(keyframe_info_fp, 'w') as f:
-    data_json_str = json.dumps(keyframeInfo, indent=4)
-    f.write(data_json_str)
-
-
-# python filmstrip.py --source /home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4 --dest /home/ben/VideoUnderstanding/example_images/Animals6mins/ --name Animals6mins --verbose
 # TODO understand after frame.
 
-def main_separate_scenes(video_path, verbose=False):
-    parser = argparse.ArgumentParser()
+def main_separate_scenes(json_struct, video_path, verbose=True):
+    # parser = argparse.ArgumentParser()
+    #
+    # parser.add_argument('-s','--source', help='source file', required=True)
+    # parser.add_argument('-d', '--dest', help='dest folder', required=True)
+    # parser.add_argument('-n', '--name', help='image sequence name', required=True)
+    # parser.add_argument('-a','--after_frame', help='after frame', default=0)
+    # parser.add_argument('-v', '--verbose', action='store_true')
+    # parser.set_defaults(verbose=False)
+    #
+    # args = parser.parse_args()
 
-    parser.add_argument('-s','--source', help='source file', required=True)
-    parser.add_argument('-d', '--dest', help='dest folder', required=True)
-    parser.add_argument('-n', '--name', help='image sequence name', required=True)
-    parser.add_argument('-a','--after_frame', help='after frame', default=0)
-    parser.add_argument('-v', '--verbose', action='store_true')
-    parser.set_defaults(verbose=False)
+    directory = os.path.dirname(video_path)
+    name = video_path.split('/')[-1][:-4]
 
-    args = parser.parse_args()
+    print 'video_path:', video_path
+    print 'dest_path:', directory
+    print 'name:', name
 
-    if args.verbose:
-        info = getInfo(args.source)
-        print("Source Info: ", info)
+    # if verbose:
+    info = getInfo(video_path)
+    print("Source Info: ", info)
 
-    makeOutputDirs(args.dest)
+    # TODO STORE ANY INFO I CAN INSIDE JSON STRUCT SO I CAN SHOW IN HTML.
+
+    json_struct['info'] = info
+
+    makeOutputDirs(directory)
 
     # Run the extraction
-    data = calculateFrameStats(args.source, args.verbose, int(args.after_frame))
-    data = detectScenes(args.source, args.dest, data, args.name, args.verbose)
+    data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
+    data = detectScenes(video_path, directory, data, name, json_struct, verbose)
     keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info]
 
     # Write out the results
-    data_fp = os.path.join(args.dest, "metadata", args.name + "-meta.json")
+    data_fp = os.path.join(directory, "metadata", name + "-meta.json")
     with open(data_fp, 'w') as f:
         data_json_str = json.dumps(data, indent=4)
         f.write(data_json_str)
 
-    keyframe_info_fp = os.path.join(args.dest, "metadata", args.name + "-keyframe-meta.json")
+    keyframe_info_fp = os.path.join(directory, "metadata", name + "-keyframe-meta.json")
     with open(keyframe_info_fp, 'w') as f:
         data_json_str = json.dumps(keyframeInfo, indent=4)
         f.write(data_json_str)
-    pass
+
+    json_path = os.path.join(directory, 'metadata', 'result_struct.json')
+    json.dump(json_struct, open(json_path, 'w'))

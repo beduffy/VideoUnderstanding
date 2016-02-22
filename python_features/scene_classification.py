@@ -10,7 +10,7 @@ current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
 example_images = os.path.join(parent_dir, 'example_images')
 
-def batch_scene_classification(folder_path, models):
+def batch_scene_classification(video_path, models):
     plt.rcParams['figure.figsize'] = (10, 10)
     plt.rcParams['image.interpolation'] = 'nearest'
     plt.rcParams['image.cmap'] = 'gray'
@@ -20,37 +20,31 @@ def batch_scene_classification(folder_path, models):
     net0 = caffe.Net(models[0]['prototxt'], models[0]['caffemodel'], caffe.TEST)
     net1 = caffe.Net(models[1]['prototxt'], models[1]['caffemodel'], caffe.TEST)
 
-    image_directory_path = os.path.join(example_images, folder_path)
-    tasks_path =  os.path.join(image_directory_path, 'tasks.txt')
+    directory = os.path.dirname(video_path)
+    image_directory_path = os.path.join(directory, 'images', 'full')
+    json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
-    filenames = []
-    with open(tasks_path) as fp:
-        print 'Opening ' + tasks_path
-        for line in fp:
-            filenames.append(line[:-1])
-
-    all_results = []
-    for image_name in filenames:
-        image_path = os.path.join(image_directory_path, image_name)
-        results1 = classify_scene(net0, image_path)
-        results2 = classify_scene(net1, image_path)
-        all_results.append({'name': image_name, 'scene_results1' : results1, 'scene_results2' : results2})
-
-    json_path = os.path.join(image_directory_path, 'result_struct.json')
     json_struct = {}
-    with open(json_path) as data_file:
+    # if os.path.exists(json_struct_path):
+    with open(json_struct_path) as data_file:
         json_struct = json.load(data_file)
 
-    print json_struct
+    print
+    print "before adding scenes: ", json_struct
+    print
 
-    for image in json_struct['images']:
-        for i in all_results:
-            if image['name'] == i['name']:
-                image['scene_results'] = i
-                print image
-                break
+    num_images = len(json_struct['images'])
+    for idx, image in enumerate(json_struct['images']):
+        image_path = os.path.join(image_directory_path, image['image_name'])
+        print 'scene %d/%d' % (idx. num_images)
+        results1 = classify_scene(net0, image_path)
+        results2 = classify_scene(net1, image_path)
+        json_struct['images'][idx]['scene_results'] = []
+        json_struct['images'][idx]['scene_results'] = {'scene_results1' : results1, 'scene_results2' : results2}
 
-    json.dump(json_struct, open(json_path, 'w'))
+    print
+    print "after adding scenes: ", json_struct
+    json.dump(json_struct, open(json_struct_path, 'w'))
 
 def classify_scene(net, image_path):
     # TODO PROCESS ALL IMAGES FIRST?
@@ -93,15 +87,15 @@ def classify_scene(net, image_path):
 
     return top_results
 
-places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
-googlenet205model = {'prototxt' : '/home/ben/VideoUnderstanding/python_features/deploy_places205.protxt', 'caffemodel' : '/home/ben/VideoUnderstanding/python_features/googlelet_places205_train_iter_2400000.caffemodel'}
+def main_scene_classification(json_struct, video_path):
+    places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
+    googlenet205model = {'prototxt' : '/home/ben/VideoUnderstanding/python_features/deploy_places205.protxt', 'caffemodel' : '/home/ben/VideoUnderstanding/python_features/googlelet_places205_train_iter_2400000.caffemodel'}
 
-all_scene_models = []
-all_scene_models.append(places205model)
-all_scene_models.append(googlenet205model)
+    all_scene_models = []
+    all_scene_models.append(places205model)
+    all_scene_models.append(googlenet205model)
 
-
-batch_scene_classification('old_example_images', all_scene_models)
+    batch_scene_classification(video_path, all_scene_models)
 
 # batch_scene_classification('old_example_images', places205model['prototxt'], places205model['caffemodel'])
 
