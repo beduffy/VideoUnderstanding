@@ -22,14 +22,38 @@
 
 from video_extraction import filmstrip
 from python_features import scene_classification
+from python_features import yolo_object_detection
+import json
+import os
 
 def extract_video_features(video_path):
     json_struct = {'images': []}
 
     # filmstrip.main_separate_scenes(json_struct, video_path, True)
-    scene_classification.main_scene_classification(json_struct, video_path)
+    # scene_classification.main_scene_classification(json_struct, video_path)
+    yolo_object_detection.main_object_detect(json_struct, '/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
 
 
-extract_video_features('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+def create_tasks_file_from_json(json_struct_path):
+    directory = os.path.dirname(json_struct_path)
 
+    json_struct = {}
+    with open(json_struct_path) as data_file:
+        json_struct = json.load(data_file)
+
+    tasks_path =  os.path.join(directory, 'tasks.txt')
+
+    file = open(tasks_path, 'w+')
+    num_images = len(json_struct['images'])
+    for idx, image in enumerate(json_struct['images']):
+        file.write(image['image_name']+'\n')
+        print image['image_name']
+
+    file.close()
+
+##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
+# TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
+
+# extract_video_features('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+# create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
