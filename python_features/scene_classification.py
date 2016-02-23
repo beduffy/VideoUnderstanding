@@ -25,13 +25,8 @@ def batch_scene_classification(video_path, models):
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
     json_struct = {}
-    # if os.path.exists(json_struct_path):
     with open(json_struct_path) as data_file:
         json_struct = json.load(data_file)
-
-    print
-    print "before adding scenes: ", json_struct
-    print
 
     num_images = len(json_struct['images'])
     for idx, image in enumerate(json_struct['images']):
@@ -42,8 +37,6 @@ def batch_scene_classification(video_path, models):
         json_struct['images'][idx]['scene_results'] = []
         json_struct['images'][idx]['scene_results'] = {'scene_results1' : results1, 'scene_results2' : results2}
 
-    print
-    print "after adding scenes: ", json_struct
     json.dump(json_struct, open(json_struct_path, 'w'))
 
 def classify_scene(net, image_path):
