@@ -19,12 +19,14 @@ def main_object_detect(json_struct, video_path):
         lines = [i[:-1] for i in f.readlines()]
 
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
-    if not json_struct:
-        with open(json_struct_path) as data_file:
-            json_struct = json.load(data_file)
+    # if not json_struct:
+    with open(json_struct_path) as data_file:
+        json_struct = json.load(data_file)
 
     current_time = 0.0
-    # object_lists = []
+    num_images = len(json_struct['images'])
+
+    print num_images
     idx = 0
 
     print 'before json_struct:', json_struct
@@ -39,16 +41,20 @@ def main_object_detect(json_struct, video_path):
         object_label_probs = output.split('\n')
         predict_message = object_label_probs[0]
         time_for_prediction = predict_message.split(' ')[-2]
-        # current_time += float(time_for_prediction)
+        current_time += float(time_for_prediction)
         object_label_probs = object_label_probs[1:-1]
         # object_lists.append(object_label_probs)
 
-        print predict_message
-        print "prediction time: ", time_for_prediction
-        print "total time taken: ", current_time
-        print object_label_probs
+        # print predict_message
+        # print "prediction time: ", time_for_prediction
+        print "total time taken in s: {} scene {}/{}".format(current_time, idx, num_images)
+        # print ' % (idx. num_images)
+        # print object_label_probs
 
         image['object_lists'] = object_label_probs
+        # TODO CHANGE ABOVE TO image['object_lists'] = [object_label_probs]
+        # print image['object_lists']
+        # print image
 
         # print 'sleeping'
         idx += 1
@@ -56,7 +62,7 @@ def main_object_detect(json_struct, video_path):
         # sleep(0.04)
 
     print 'after json_struct:', json_struct
-    # json.dump(json_struct, open(json_struct_path, 'w'))
+    json.dump(json_struct, open(json_struct_path, 'w'))
 
 
 # main_object_detect('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')

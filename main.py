@@ -26,12 +26,12 @@ from python_features import yolo_object_detection
 import json
 import os
 
-def extract_video_features(video_path):
+def process_video(video_path):
     json_struct = {'images': []}
 
     # filmstrip.main_separate_scenes(json_struct, video_path, True)
     # scene_classification.main_scene_classification(json_struct, video_path)
-    yolo_object_detection.main_object_detect(json_struct, '/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+    yolo_object_detection.main_object_detect(json_struct, video_path)
 
 
 
@@ -55,5 +55,5 @@ def create_tasks_file_from_json(json_struct_path):
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 
-# extract_video_features('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')

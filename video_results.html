@@ -41,17 +41,28 @@
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
                             <div>Frame Number: {{frame_number}}</div>
+							<br>
+
                             <div class='scene_desc'>
+								<h2>Scene Results 1</h2>
                                 {{#each scene_results.scene_results1}}
                                     <div>{{label}} : {{probability}}</div>
                                 {{/each}}
                             </div>
                             <br>
                             <div class='scene_desc'>
+								<h2>Scene Results 2</h2>
                                 {{#each scene_results.scene_results2}}
                                     <div>{{label}} : {{probability}}</div>
                                 {{/each}}
                             </div>
+							<br>
+							<div class="object_list">
+								<h2>Object Lists</h2>
+								{{#each object_lists}}
+									<div>{{this}}</div>
+								{{/each}}
+							</div>
                         </div>
 					</div>
 				</td>"
