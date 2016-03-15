@@ -58,12 +58,6 @@
 					<div class="frame">
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
-							{{#if @index }}
-								<div>lollol</div>
-							{{/if}}
-
-
-
                             <div>Frame Number: {{frame_number}}</div>
 							<div>Time: {{divide frame_number}}s</div>
 							<!--TODO ADD time out of full length of video.-->
@@ -252,24 +246,19 @@
 //				return (data.images[index].scene_num === data.images[index-1].scene_num) ? true : false;
 			});
 
-
-
-
 			var theTemplateScript = $("#image-template").html();
 			var theTemplate = Handlebars.compile(theTemplateScript);
 			var theCompiledHtml = theTemplate(data);
 			$pageWrap.append(theCompiledHtml);
 
 			var lastSceneNumber = 0;
-			$this.find('.description').append("<div>SCENE CHANGE</div>");
+//			$this.find('.description').append("<div>SCENE CHANGE</div>");
 
 			$pageWrap.find('td').each(function() {
 				var $this = $(this);
-				console.log(parseInt($this.find('.scene_number_span').text()));
 				if (lastSceneNumber !== parseInt($this.find('.scene_number_span').text())) {
-					console.log("inside");
 					lastSceneNumber = parseInt($this.find('.scene_number_span').text());
-					$this.find('.description').append("<div>SCENE CHANGE</div>");
+					$this.find('.description').append("<div style='color: red;'>SCENE CHANGE</div>");
 				}
 			})
 		});
