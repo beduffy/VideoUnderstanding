@@ -50,7 +50,6 @@
 		<!--{{isEqual}}-->
 								<!--<div>HEY HEYOOOO2131232131232131231</div>-->
 							<!--{{/if}}-->
-
 		<script id="image-template" type="text/x-handlebars-template">
 
 			{{#each images}}
@@ -58,6 +57,15 @@
 					<div class="frame">
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
+							<svg style="width:{{getFrameWidth}};">
+								<g transform="translate(0,0)">
+									{{#each dominant_colours}}
+										<rect x="{{getStartRect count @index}}" width="{{getRectWidth count}}" height="40" style="fill:rgb({{getColourString col.[0] col.[1] col.[2]}})">
+
+										</rect>
+									{{/each}}
+								</g>
+							</svg>
                             <div>Frame Number: {{frame_number}}</div>
 							<div>Time: {{divide frame_number}}s</div>
 							<!--TODO ADD time out of full length of video.-->
@@ -101,6 +109,8 @@
 	var imageDirectory;
 	var globalData;
 
+	var frameWidth = 500.0;
+	var numDominantColours;;
 	var QueryString = function () {
 	  // This function is anonymous, is executed immediately and
 	  // the return value is assigned to QueryString!
@@ -245,6 +255,32 @@
 //				}
 //				return (data.images[index].scene_num === data.images[index-1].scene_num) ? true : false;
 			});
+
+			Handlebars.registerHelper('getColourString', function (a, b, c) {
+				return Math.round(a) + ", " +  Math.round(b) + ", " + Math.round(c);
+			});
+
+			Handlebars.registerHelper('getStartRect', function (count, index) {
+				var width = (count / 10000.0) * frameWidth;
+
+				var returnValue = widthTravelled;
+				widthTravelled += width;
+				if (index == numDominantColours - 1) widthTravelled = 0;
+				return Math.round(returnValue);
+			});
+
+			Handlebars.registerHelper('getRectWidth', function (count) {
+				var width = (count / 10000.0) * frameWidth;
+
+				return Math.round(width);
+			});
+
+			Handlebars.registerHelper('getFrameWidth', function () {
+				return frameWidth;
+			});
+
+			widthTravelled = 0;
+            numDominantColours = data.images.dominant_colours.length;
 
 			var theTemplateScript = $("#image-template").html();
 			var theTemplate = Handlebars.compile(theTemplateScript);

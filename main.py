@@ -40,7 +40,7 @@ def process_video(video_path):
     start = timer()
     filmstrip.main_separate_scenes(json_struct, video_path, False)
     end = timer()
-    print 'Time taken to extract pictures and separate into scenes was:', round((end - start), 5), 'seconds.'
+    print 'Time taken:', round((end - start), 5), 'seconds.'
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)

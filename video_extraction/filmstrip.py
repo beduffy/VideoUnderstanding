@@ -239,9 +239,11 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
                     # todo all below into function
                     # extract dominant color
                     small = resize(frame, 100, 100)
-                    cols = extract_cols(small, 5)
+                    # Todo make 5 a global?
+                    dom_colours = extract_cols(small, 3)
                     #  todo for now have k means data in other json file??
-                    data["frame_info"][index]["dominant_cols"] = cols
+                    # data["frame_info"][index]["dominant_cols"] = cols
+
 
 
                     if frame != None:
@@ -258,7 +260,7 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
                         #if json_struct['images'][]
 
 
-                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num})
+                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num, 'dominant_colours': dom_colours})
 
                         if verbose:
                             cv2.imshow('extract', frame)
@@ -311,13 +313,13 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     directory = os.path.dirname(video_path)
     name = video_path.split('/')[-1][:-4]
 
-    print 'video_path:', video_path
-    print 'dest_path:', directory # TODO BETTER DESCRIPTION
+    print 'Video Path:', video_path
+    print 'Directory Path:', directory
     print 'Name of video:', name
 
     # if verbose:
     info = getInfo(video_path)
-    print "Video Info: ", info
+
 
     # TODO STORE ANY INFO I CAN INSIDE JSON STRUCT SO I CAN SHOW IN HTML.
 
@@ -328,18 +330,21 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     # Run the extraction
     data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
     data = detectScenes(video_path, directory, data, name, json_struct, verbose)
-    keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info]
+    keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info] # todo doesnt include all keyframes coz no dominant cols
 
-    # Write out the results
-    data_fp = os.path.join(directory, "metadata", name + "-meta.json")
-    with open(data_fp, 'w') as f:
-        data_json_str = json.dumps(data, indent=4)
-        f.write(data_json_str)
-
-    keyframe_info_fp = os.path.join(directory, "metadata", name + "-keyframe-meta.json")
-    with open(keyframe_info_fp, 'w') as f:
-        data_json_str = json.dumps(keyframeInfo, indent=4)
-        f.write(data_json_str)
+    # # Write out the results
+    # data_fp = os.path.join(directory, "metadata", name + "-meta.json")
+    # with open(data_fp, 'w') as f:
+    #     data_json_str = json.dumps(data, indent=4)
+    #     f.write(data_json_str)
+    #
+    # keyframe_info_fp = os.path.join(directory, "metadata", name + "-keyframe-meta.json")
+    # with open(keyframe_info_fp, 'w') as f:
+    #     data_json_str = json.dumps(keyframeInfo, indent=4)
+    #     f.write(data_json_str)
 
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
     json.dump(json_struct, open(json_path, 'w'))
+
+    print "Video Info: ", json_struct['info']
+    print "Video scene and frame extraction complete."

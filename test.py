@@ -21,9 +21,12 @@ def video_step_through(video_path):
     while(k != 'q'):
         k = cv2.waitKey(1)
         if  k == ord('p'):
+        # if  k == ord('2555904'):
             frame_number += 1
             changeImage(cap, frame_number)
         if k == ord('o'):
+        # if k == 2424832:
+
             frame_number -= 1
             changeImage(cap, frame_number)
         if k == ord('q'):
