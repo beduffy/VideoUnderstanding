@@ -19,9 +19,9 @@ def main_object_detect(json_struct, video_path):
         lines = [i[:-1] for i in f.readlines()]
 
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
-    # if not json_struct:
-    with open(json_struct_path) as data_file:
-        json_struct = json.load(data_file)
+    if os.path.isfile(json_struct_path):
+        with open(json_struct_path) as data_file:
+            json_struct = json.load(data_file)
 
     current_time = 0.0
     num_images = len(json_struct['images'])
@@ -41,7 +41,7 @@ def main_object_detect(json_struct, video_path):
         object_label_probs = output.split('\n')
         predict_message = object_label_probs[0]
         time_for_prediction = predict_message.split(' ')[-2]
-        current_time += float(time_for_prediction)
+        current_time += float(time_for_prediction)  #TODO ERROR HERE!!! ValueError: could not convert string to float: Path:
         object_label_probs = object_label_probs[1:-1]
         # object_lists.append(object_label_probs)
 

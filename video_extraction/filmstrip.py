@@ -19,7 +19,6 @@ def getInfo(sourcePath):
         "height": int(cap.get(cv.CV_CAP_PROP_FRAME_HEIGHT)),
         "codec": int(cap.get(cv.CV_CAP_PROP_FOURCC))
     }
-    print "Video information: ", info
 
     cap.release()
     return info
@@ -189,36 +188,86 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
     # diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
     diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
 
+    scene_num = 0
+
+    first_scene_first_frame = None
+    next_scene_first_frame = None
+
     cap = cv2.VideoCapture(sourcePath)
     for index, fi in enumerate(data["frame_info"]):
         if fi["diff_count"] < diff_threshold:
             continue
 
-        cap.set(cv.CV_CAP_PROP_POS_FRAMES, fi["frame_number"])
-        ret, frame = cap.read()
+        if not first_scene_first_frame:
+            first_scene_first_frame = fi["frame_number"]
+            continue
 
-        # extract dominant color
-        small = resize(frame, 100, 100)
-        cols = extract_cols(small, 5)
-        data["frame_info"][index]["dominant_cols"] = cols
+        else:
+            next_scene_first_frame = fi["frame_number"]
+
+            num_frames_in_scene = 5
+            frames_taken = 0
+
+            range = next_scene_first_frame - first_scene_first_frame
+
+            jump_rate = range / num_frames_in_scene
+
+            if jump_rate == 0:
+                num_frames_in_scene = range
+                jump_rate = 1
+
+            current_frame_num = first_scene_first_frame
+
+            print 'Saving scene frames between: ', first_scene_first_frame, '-', next_scene_first_frame
+            print 'Range: ', range, 'jump rate: ', jump_rate
+            print 'Scene number: ', scene_num
+
+            while frames_taken < num_frames_in_scene:
+                # todo have to really make sure no duplicates
+                # todo last scene don't add
+                # if frames_taken == num_frames_in_scene - 1:
+                #     current_frame_num = first_scene_first_frame
+
+                # last frame don't add
+                if current_frame_num != next_scene_first_frame:
+                    cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
+                    ret, frame = cap.read()
+
+                    # todo all below into function
+                    # extract dominant color
+                    small = resize(frame, 100, 100)
+                    cols = extract_cols(small, 5)
+                    #  todo for now have k means data in other json file??
+                    data["frame_info"][index]["dominant_cols"] = cols
 
 
-        if frame != None:
-            #writeImagePyramid(destDir, name, fi["frame_number"], frame)
-            image_name = name + "-" + str(fi["frame_number"]) + ".png"
-            fullPath = os.path.join(destDir, "full", image_name)
-            cv2.imwrite(fullPath, frame)
+                    if frame != None:
+                        #TODO CHANGE ALL FI BELOW TO PROPER FRAME
+                        #writeImagePyramid(destDir, name, fi["frame_number"], frame)
+                        image_name = name + "-" + str(current_frame_num) + ".png" #todo png always?
+                        fullPath = os.path.join(destDir, "full", image_name)
+                        cv2.imwrite(fullPath, frame)
 
-            print fullPath
+                        print fullPath
 
-            json_struct['images'].append({'image_name': image_name, 'frame_number': fi["frame_number"]})
+                        #if json_struct['images'][]
+                        json_struct['images'] = [] # TODO OOOOOOO BIG MOVE
 
-            if verbose:
-                cv2.imshow('extract', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num})
+
+                        if verbose:
+                            cv2.imshow('extract', frame)
+                            if cv2.waitKey(1) & 0xFF == ord('q'):
+                                break
+
+                    current_frame_num += jump_rate
+                    frames_taken += 1
+
+            first_scene_first_frame = next_scene_first_frame
+            scene_num += 1
 
     json_struct['info']['num_images'] = len(json_struct['images'])
+    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
     cap.release()
     cv2.destroyAllWindows()
     return data
@@ -228,8 +277,9 @@ def makeOutputDirs(path):
     try:
         #todo this doesn't quite work like mkdirp. it will fail
         #fi any folder along the path exists. fix
-        os.makedirs(os.path.join(path, "metadata"))
-        os.makedirs(os.path.join(path, "images", "full"))
+        # print os.getcwd()
+        print os.makedirs(os.path.join(path, "metadata"))
+        print os.makedirs(os.path.join(path, "images", "full"))
         # os.makedirs(os.path.join(path, "images", "half"))
         # os.makedirs(os.path.join(path, "images", "quarter"))
         # os.makedirs(os.path.join(path, "images", "eigth"))

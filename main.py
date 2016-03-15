@@ -25,13 +25,25 @@ from python_features import scene_classification
 from python_features import yolo_object_detection
 import json
 import os
+from timeit import default_timer as timer
 
 def process_video(video_path):
-    json_struct = {'images': []}
+    directory = os.path.dirname(video_path)
+    image_directory_path = os.path.join(directory, 'images', 'full')
+    json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
-    # filmstrip.main_separate_scenes(json_struct, video_path, True)
+    json_struct = {'images': []}
+    if os.path.isfile(json_struct_path):
+        with open(json_struct_path) as data_file:
+            json_struct = json.load(data_file)
+
+    start = timer()
+    filmstrip.main_separate_scenes(json_struct, video_path, True)
+    end = timer()
+    print 'Time taken to extract pictures and separate into scenes was:', round((end - start), 5), 'seconds.'
+
     # scene_classification.main_scene_classification(json_struct, video_path)
-    yolo_object_detection.main_object_detect(json_struct, video_path)
+    # yolo_object_detection.main_object_detect(json_struct, video_path)
 
 
 

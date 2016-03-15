@@ -28,6 +28,7 @@
             <div class="description">
 			    <div>Number of frames: {{info.framecount}}</div>
                 <div>Number of images:  {{info.num_images}}</div>
+				<div>FPS: {{info.fps}}</div>
             </div>
 		</script>
 	</div>
@@ -41,6 +42,10 @@
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
                             <div>Frame Number: {{frame_number}}</div>
+							<div>Time: {{divide frame_number}}s</div>
+							<!--TODO ADD time out of full length of video.-->
+							<!-- TODO add all images together to form timeline to see whole video in one go.!!!!!!!! video summarisation best idea ever-->
+							<div>Scene number: {{scene_num}}</div>
 							<br>
 
                             <div class='scene_desc'>
@@ -133,6 +138,11 @@
 
 			Handlebars.registerHelper('addDirectory', function(image_name) {
 				return imageDirectory + image_name;
+			});
+
+			Handlebars.registerHelper('divide', function(frame_number) {
+				// TODO change 30.0 to fps?
+				return (frame_number / 30.0).toFixed(2);
 			});
 
 			var theTemplateScript = $("#image-template").html();
