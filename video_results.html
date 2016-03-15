@@ -280,7 +280,7 @@
 			});
 
 			widthTravelled = 0;
-            numDominantColours = data.images.dominant_colours.length;
+            numDominantColours = data.images[0].dominant_colours.length;
 
 			var theTemplateScript = $("#image-template").html();
 			var theTemplate = Handlebars.compile(theTemplateScript);
