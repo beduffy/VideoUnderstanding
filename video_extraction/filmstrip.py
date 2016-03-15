@@ -186,7 +186,10 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
 
     # TODO make sd multiplier externally configurable
     # diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
-    diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
+    # diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
+    diff_threshold = (data["stats"]["sd"] * 3.5) + data["stats"]["mean"]
+
+    json_struct['images'] = [] # TODO OOOOOOO BIG MOVE
 
     scene_num = 0
 
@@ -244,14 +247,16 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
                     if frame != None:
                         #TODO CHANGE ALL FI BELOW TO PROPER FRAME
                         #writeImagePyramid(destDir, name, fi["frame_number"], frame)
-                        image_name = name + "-" + str(current_frame_num) + ".png" #todo png always?
+                        #todo png always?
+                        image_name = name + "-" + str(current_frame_num) + ".png"
+
                         fullPath = os.path.join(destDir, "full", image_name)
                         cv2.imwrite(fullPath, frame)
 
                         print fullPath
 
                         #if json_struct['images'][]
-                        json_struct['images'] = [] # TODO OOOOOOO BIG MOVE
+
 
                         json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num})
 
@@ -268,26 +273,26 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
 
     json_struct['info']['num_images'] = len(json_struct['images'])
     json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
+    json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
     cap.release()
     cv2.destroyAllWindows()
     return data
 
 
 def makeOutputDirs(path):
-    try:
-        #todo this doesn't quite work like mkdirp. it will fail
-        #fi any folder along the path exists. fix
-        # print os.getcwd()
-        print os.makedirs(os.path.join(path, "metadata"))
-        print os.makedirs(os.path.join(path, "images", "full"))
-        # os.makedirs(os.path.join(path, "images", "half"))
-        # os.makedirs(os.path.join(path, "images", "quarter"))
-        # os.makedirs(os.path.join(path, "images", "eigth"))
-        # os.makedirs(os.path.join(path, "images", "sixteenth"))
-    except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
+    #todo this doesn't quite work like mkdirp. it will fail
+
+    if not os.path.isdir(os.path.join(path, "metadata")):
+        os.makedirs(os.path.join(path, "metadata"))
+
+    if not os.path.isdir(os.path.join(path, "images", "full")):
+        os.makedirs(os.path.join(path, "images", "full"))
+
+    # os.makedirs(os.path.join(path, "images", "half"))
+    # os.makedirs(os.path.join(path, "images", "quarter"))
+    # os.makedirs(os.path.join(path, "images", "eigth"))
+    # os.makedirs(os.path.join(path, "images", "sixteenth"))
+
 
 # TODO understand after frame.
 
@@ -307,12 +312,12 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     name = video_path.split('/')[-1][:-4]
 
     print 'video_path:', video_path
-    print 'dest_path:', directory
-    print 'name:', name
+    print 'dest_path:', directory # TODO BETTER DESCRIPTION
+    print 'Name of video:', name
 
     # if verbose:
     info = getInfo(video_path)
-    print("Source Info: ", info)
+    print "Video Info: ", info
 
     # TODO STORE ANY INFO I CAN INSIDE JSON STRUCT SO I CAN SHOW IN HTML.
 

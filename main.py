@@ -38,7 +38,7 @@ def process_video(video_path):
             json_struct = json.load(data_file)
 
     start = timer()
-    filmstrip.main_separate_scenes(json_struct, video_path, True)
+    filmstrip.main_separate_scenes(json_struct, video_path, False)
     end = timer()
     print 'Time taken to extract pictures and separate into scenes was:', round((end - start), 5), 'seconds.'
 
