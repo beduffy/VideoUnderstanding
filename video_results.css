@@ -11,7 +11,7 @@ body {
 	font-size: 62.5%;
 	font-family: 'Lucida Grande', Helvetica, sans-serif;
 	background: #ffffff;
-	color: #352899;
+	color: #352899;  /*todo */
 	padding: 20px;
 }
 
@@ -59,6 +59,11 @@ tr {
 div {
 	/*font-size: 1em*/
 	font-size: x-large;
+}
+
+svg {
+	width: 500px;
+	height: 45px;
 }
 
 /*

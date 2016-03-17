@@ -32,7 +32,7 @@ def batch_scene_classification(video_path, models):
     num_images = len(json_struct['images'])
     for idx, image in enumerate(json_struct['images']):
         image_path = os.path.join(image_directory_path, image['image_name'])
-        print 'scene %d/%d' % (idx. num_images)
+        # print 'scene %d/%d' % (idx. num_images) TODO CRASHES HERE AttributeError: 'int' object has no attribute 'num_images'
         results1 = classify_scene(net0, image_path)
         results2 = classify_scene(net1, image_path)
         json_struct['images'][idx]['scene_results'] = []  #todo ????

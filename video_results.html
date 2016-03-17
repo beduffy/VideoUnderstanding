@@ -30,6 +30,7 @@
                 <div>Number of images:  {{info.num_images}}</div>
 				<div>Number of scenes:  {{info.num_scenes}}</div>
 				<div>FPS: {{info.fps}}</div>
+				<div>Length: {{divide info.length 60.0}} minutes</div>
             </div>
 		</script>
 	</div>
@@ -50,6 +51,9 @@
 		<!--{{isEqual}}-->
 								<!--<div>HEY HEYOOOO2131232131232131231</div>-->
 							<!--{{/if}}-->
+
+<!--{{#dominant_colours.avg_colour}}-->
+<!--{{/each}}-->
 		<script id="image-template" type="text/x-handlebars-template">
 
 			{{#each images}}
@@ -57,15 +61,27 @@
 					<div class="frame">
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
+							<div>K-means:</div>
 							<svg style="width:{{getFrameWidth}};">
 								<g transform="translate(0,0)">
-									{{#each dominant_colours}}
+									{{#each dominant_colours.kmeans}}
 										<rect x="{{getStartRect count @index}}" width="{{getRectWidth count}}" height="40" style="fill:rgb({{getColourString col.[0] col.[1] col.[2]}})">
-
 										</rect>
 									{{/each}}
 								</g>
 							</svg>
+
+							<div>Avg colour:</div>
+							<svg style="width:{{getFrameWidth}};">
+								<g transform="translate(0,0)">
+
+										<rect x="0" width="{{getFrameWidth}}" height="40" style="fill:rgb({{getColourString dominant_colours.avg_colour.col.[0] dominant_colours.avg_colour.col.[1] dominant_colours.avg_colour.col.[2]}})">
+										</rect>
+
+								</g>
+							</svg>
+							<div>L2 Distance: {{dominant_colours.l2distnext}}</div>
+
                             <div>Frame Number: {{frame_number}}</div>
 							<div>Time: {{divide frame_number}}s</div>
 							<!--TODO ADD time out of full length of video.-->
@@ -160,6 +176,12 @@
 			globalData = data;
 			var $pageWrap = $("#page-wrap");
 			imageDirectory = imageDirectory + 'images/full/';
+			numDominantColours = data.images[0].dominant_colours.kmeans.length;
+
+			Handlebars.registerHelper('divide', function (num1, num2) {
+				// CONVERT TO TIME TODO
+				return (num1 / num2).toFixed(3);
+			});
 
 			var headerScript = $("#header-template").html();
 			var headerTemplate = Handlebars.compile(headerScript);
@@ -260,12 +282,17 @@
 				return Math.round(a) + ", " +  Math.round(b) + ", " + Math.round(c);
 			});
 
+			widthTravelled = 0;
+
 			Handlebars.registerHelper('getStartRect', function (count, index) {
 				var width = (count / 10000.0) * frameWidth;
 
 				var returnValue = widthTravelled;
 				widthTravelled += width;
-				if (index == numDominantColours - 1) widthTravelled = 0;
+
+				if (index == (numDominantColours - 1)) {
+					widthTravelled = 0;
+				}
 				return Math.round(returnValue);
 			});
 
@@ -278,9 +305,6 @@
 			Handlebars.registerHelper('getFrameWidth', function () {
 				return frameWidth;
 			});
-
-			widthTravelled = 0;
-            numDominantColours = data.images[0].dominant_colours.length;
 
 			var theTemplateScript = $("#image-template").html();
 			var theTemplate = Handlebars.compile(theTemplateScript);
