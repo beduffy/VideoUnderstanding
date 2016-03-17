@@ -8,7 +8,10 @@ import argparse
 import json
 import os
 import numpy as np
+from scipy.spatial import distance
 import errno
+import colorsys
+from skimage import io, color
 
 def getInfo(sourcePath):
     cap = cv2.VideoCapture(sourcePath)
@@ -209,7 +212,6 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
             next_scene_first_frame = fi["frame_number"]
 
             num_frames_in_scene = 5
-            frames_taken = 0
 
             range = next_scene_first_frame - first_scene_first_frame
 
@@ -225,6 +227,7 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
             print 'Range: ', range, 'jump rate: ', jump_rate
             print 'Scene number: ', scene_num
 
+            frames_taken = 0
             while frames_taken < num_frames_in_scene:
                 # todo have to really make sure no duplicates
                 # todo last scene don't add
@@ -257,10 +260,17 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
 
                         print fullPath
 
-                        #if json_struct['images'][]
+                        avg_colour = [0.0, 0.0, 0.0]
+                        total = 10000.0
+                        for colour in dom_colours:
+                            weight = colour['count'] / total
+                            for idx, num in enumerate(colour['col']):
+                                avg_colour[idx] += weight * num
+                                # avg_colour.append(weight * num)
 
+                        # print avg_colour
 
-                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num, 'dominant_colours': dom_colours})
+                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num, 'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}})
 
                         if verbose:
                             cv2.imshow('extract', frame)
@@ -273,6 +283,32 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
             first_scene_first_frame = next_scene_first_frame
             scene_num += 1
 
+    num_images = len(json_struct['images'])
+    for idx, image in enumerate(json_struct['images']):
+        # if idx - 1 >= 0:
+        #     prev_image = json_struct['images'][idx - 1]
+        if idx + 1 == num_images:
+            break
+
+        next_avg_colour = json_struct['images'][idx + 1]['dominant_colours']['avg_colour']['col']
+        cur_avg_colour = image['dominant_colours']['avg_colour']['col']
+
+        # next_avg_colour = colorsys.rgb_to_hsv(next_avg_colour[0], next_avg_colour[1], next_avg_colour[2])
+        # cur_avg_colour = colorsys.rgb_to_hsv(cur_avg_colour[0], cur_avg_colour[1], cur_avg_colour[2])
+
+        print 'next colour', next_avg_colour
+
+        next_avg_colour = rgb2lab(next_avg_colour)
+        cur_avg_colour = rgb2lab(cur_avg_colour)
+
+        print 'next colour lab', next_avg_colour
+        # colorsys.
+        # dist = np.linalg.norm(next_avg_colour - cur_avg_colour)
+        dist = distance.euclidean(next_avg_colour, cur_avg_colour)
+
+        image['dominant_colours']['l2distnext'] = round(dist, 3)
+
+
     json_struct['info']['num_images'] = len(json_struct['images'])
     json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
     json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
@@ -280,6 +316,45 @@ def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
     cv2.destroyAllWindows()
     return data
 
+def rgb2lab(rgb):
+    def func(t):
+        if (t > 0.008856):
+            return np.power(t, 1/3.0)
+        else:
+            return 7.787 * t + 16 / 116.0
+    #Conversion Matrix
+    matrix = [[0.412453, 0.357580, 0.180423],
+              [0.212671, 0.715160, 0.072169],
+              [0.019334, 0.119193, 0.950227]]
+
+    # RGB values lie between 0 to 1.0
+    # rgb = [1.0, 0, 0] # RGB
+
+    for i in rgb:
+        i = i / 255.0
+
+    cie = np.dot(matrix, rgb)
+
+    cie[0] = cie[0] /0.950456
+    cie[2] = cie[2] /1.088754
+
+    # Calculate the L
+    L = 116 * np.power(cie[1], 1/3.0) - 16.0 if cie[1] > 0.008856 else 903.3 * cie[1]
+
+    # Calculate the a
+    a = 500*(func(cie[0]) - func(cie[1]))
+
+    # Calculate the b
+    b = 200*(func(cie[1]) - func(cie[2]))
+
+    #  Values lie between -128 < b <= 127, -128 < a <= 127, 0 <= L <= 100
+    Lab = [b , a, L]
+
+    # OpenCV Format
+    L = L * 255 / 100
+    a = a + 128
+    b = b + 128
+    return [b , a, L]
 
 def makeOutputDirs(path):
     #todo this doesn't quite work like mkdirp. it will fail
@@ -330,7 +405,7 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     # Run the extraction
     data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
     data = detectScenes(video_path, directory, data, name, json_struct, verbose)
-    keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info] # todo doesnt include all keyframes coz no dominant cols
+    # keyframeInfo = [frame_info for frame_info in data["frame_info"] if "dominant_cols" in frame_info] # todo doesnt include all keyframes coz no dominant cols
 
     # # Write out the results
     # data_fp = os.path.join(directory, "metadata", name + "-meta.json")
