@@ -25,6 +25,7 @@ from python_features import scene_classification
 from python_features import yolo_object_detection
 import json
 import os
+import cv, cv2
 from timeit import default_timer as timer
 
 def process_video(video_path):
@@ -46,7 +47,6 @@ def process_video(video_path):
     # yolo_object_detection.main_object_detect(json_struct, video_path)
 
 
-
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
 
@@ -64,8 +64,73 @@ def create_tasks_file_from_json(json_struct_path):
 
     file.close()
 
+def video_into_all_frames(video_path, interval=10):
+    directory = os.path.dirname(video_path)
+    name = video_path.split('/')[-1][:-4]
+
+    if not os.path.isdir(os.path.join(directory, "all_frames")):
+        os.makedirs(os.path.join(directory, "all_frames"))
+
+    dest_dir = os.path.join(directory, "all_frames")
+
+    cap = cv2.VideoCapture(video_path)
+    frame_number = 1
+
+    while (cap.isOpened()):
+        cap.set(cv.CV_CAP_PROP_POS_FRAMES, frame_number)
+        ret, frame = cap.read()
+
+        if frame != None:
+            cv2.imshow('frame', frame)
+            #TODO CHANGE ALL FI BELOW TO PROPER FRAME
+            #writeImagePyramid(destDir, name, fi["frame_number"], frame)
+            #todo png always?
+            image_name = name + "-" + str(frame_number) + ".png"
+
+            fullPath = os.path.join(dest_dir, image_name)
+            cv2.imwrite(fullPath, frame)
+
+            print fullPath
+        else:
+            break
+
+        frame_number += interval
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 
 process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
+
+
+# video_into_all_frames('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+
+
+#'/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4'
+
+'''
+    17 scenes around
+    key frames for above:
+    201-211
+    971-981
+    1561-1571
+    2261-2271
+    2781-2791
+    3211-3221
+    3781-3791
+    4581-4591
+    5561-5571
+    6211-6221
+    6751-6761
+    7231-7241
+    7951-7961
+    8791-8801
+    9931-8941 blackness of arm
+    9571-9581
+    10281-10291
+'''
