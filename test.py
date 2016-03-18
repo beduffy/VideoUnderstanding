@@ -18,11 +18,13 @@ def video_step_through(video_path):
     frame_number = 0
     changeImage(cap, frame_number)
 
-    faster_rate = 5
+    faster_rate = 100
 
     k = 'a'
     while(k != 'q'):
+        # print 'hoh'
         k = cv2.waitKey(1)
+        # print 'hah'
         if  k == ord('p'):
         # if  k == ord('2555904'):
             frame_number += 1
@@ -43,7 +45,7 @@ def video_step_through(video_path):
 
         if k == ord('i'):
             requested_frame = int(raw_input())
-            if requested_frame >= 0: # And less than or equal to last frame
+            if requested_frame >= 0 and requested_frame <= cap.get(cv.CV_CAP_PROP_FRAME_COUNT): # And less than or equal to last frame
                 frame_number = requested_frame
                 changeImage(cap, frame_number)
         if k == ord('q'):
@@ -62,6 +64,7 @@ def changeImage(cap, frame_number):
     text = "frame_no: " + str(frame_number)
     cv2.putText(frame, text, (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
     cv2.imshow('Frame', frame)
+    cv2.waitKey(1)
 
 def optical_flow(video_path):
     cap = cv2.VideoCapture(video_path)
@@ -100,7 +103,9 @@ def optical_flow(video_path):
 
 # optical_flow('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
-video_step_through('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+# video_step_through('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+
+video_step_through('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 
 
 print distance.euclidean([0, 0, 0], [255, 255, 255])

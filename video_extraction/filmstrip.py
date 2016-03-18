@@ -189,6 +189,12 @@ def writeImagePyramid(destPath, name, seqNumber, image):
 def detect_scenes(cap, json_struct, data, verbose):
     multiplier = 1.44
 
+    # DOGS BABIES
+    multiplier = 1.25  # 1 missing
+    multiplier = 1.2
+    multiplier = 1.1
+    multiplier = 0.676 # TODO DAMN THATS WAY DIFFERENT rUN SEARCH OB HYPERPARAMETER FOR MULTIPLIER FOR EACH VIDEO.
+
     multplier_times_sd = (json_struct["stats"]["sd"] * multiplier)
     mean_plus_multiplier_times_sd = multplier_times_sd + json_struct["stats"]["mean"]
 
@@ -207,15 +213,15 @@ def detect_scenes(cap, json_struct, data, verbose):
 
                 frame_text = ('frame_no: {0} -- chi_diff: {1}').format(right_frame_no, data['frame_info'][idx - 1]["chi_diff"])
                 cv2.putText(right_frame, frame_text , (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
-                cv2.imshow('left frame', right_frame)
+                cv2.imshow('right frame', right_frame)
 
-                # previous frame
-                cap.set(cv.CV_CAP_PROP_POS_FRAMES, left_frame_no)
-                ret, left_frame = cap.read()
-
-                frame_text = ('frame_no: {0} -- chi_diff: {1}').format(left_frame_no, data['frame_info'][idx - 1]["chi_diff"])
-                cv2.putText(left_frame, frame_text, (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
-                cv2.imshow('right frame', left_frame)
+                # # previous frame
+                # cap.set(cv.CV_CAP_PROP_POS_FRAMES, left_frame_no)
+                # ret, left_frame = cap.read()
+                #
+                # frame_text = ('frame_no: {0} -- chi_diff: {1}').format(left_frame_no, data['frame_info'][idx - 1]["chi_diff"])
+                # cv2.putText(left_frame, frame_text, (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
+                # cv2.imshow('left frame', left_frame)
 
             # isolate down to 10 range
             still_count, left_frame_no, right_frame_no = isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no)
@@ -334,75 +340,90 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
 
     # todo below into function ASAP
     # FUNCTION CALLED create frames
-    first_scene_first_frame = 0
+    left_scene_first_frame = 0
     for scene_change in json_struct['scene_changes']:
         num_range = scene_change['frame_range_100'].split('-')
-        next_scene_first_frame = int(num_range[0])
+        print num_range
+        print num_range[0], num_range[1]
+        right_scene_first_frame = int(num_range[0])
+
+        #TODO OR TAKE IT BACK TO WHAT IT WAS? NO POINT LOOKING AT A SCENE THATS ONLY A 100 FRAMES LONG. NOT WORTH IT. YEA I THINK IM RIGHT.
+        if (int(num_range[0]) - int(num_range[1])) == 0:
+            right_scene_first_frame = int(num_range[1])
+
+
 
         num_frames_in_scene = INITIAL_NUM_FRAMES_IN_SCENE
-        range = next_scene_first_frame - first_scene_first_frame
+        range = right_scene_first_frame - left_scene_first_frame
         jump_rate = range / num_frames_in_scene
 
         # should NEVER HAPPEN
-        if jump_rate == 0:
-            num_frames_in_scene = range
-            jump_rate = 1
+        # if jump_rate == 0:
+            # right_scene_first_frame = int(num_range[1])
 
-        current_frame_num = first_scene_first_frame
+            # num_frames_in_scene = range
+            # jump_rate = 1
 
-        print 'Saving scene frames between: ', first_scene_first_frame, '-', next_scene_first_frame
+        current_frame_num = left_scene_first_frame
+
+        #MASSIVE BUG CANT GET FINAL FRAMES
+
+        print 'Saving scene frames between: ', left_scene_first_frame, '-', right_scene_first_frame
         print 'Range: ', range, 'jump rate: ', jump_rate
         print 'Scene number: ', scene_num
 
         frames_taken = 0
         while frames_taken < num_frames_in_scene:
             # last frame don't add???
-            if current_frame_num != next_scene_first_frame:
-                cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
-                ret, frame = cap.read()
+            # if current_frame_num != next_scene_first_frame:
+            cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
+            ret, frame = cap.read()
 
-                # todo separate everything into functions
+            # todo separate everything into functions
 
-                # extract dominant color
-                small = resize(frame, 100, 100)
-                # Todo make 5 a global?
-                dom_colours = extract_cols(small, 3)
+            # extract dominant color
+            small = resize(frame, 100, 100)
+            # Todo make 5 a global?
+            dom_colours = extract_cols(small, 3)
 
-                if frame != None:
-                    #todo png always?
-                    image_name = name + "-" + str(current_frame_num) + ".png"
+            if frame != None:
+                #todo png always?
+                image_name = name + "-" + str(current_frame_num) + ".png"
 
-                    fullPath = os.path.join(dest_dir, "full", image_name)
-                    cv2.imwrite(fullPath, frame)
+                fullPath = os.path.join(dest_dir, "full", image_name)
+                cv2.imwrite(fullPath, frame)
 
-                    print fullPath
+                print fullPath
 
-                    avg_colour = [0.0, 0.0, 0.0]
-                    total = 10000.0
-                    for colour in dom_colours:
-                        weight = colour['count'] / total
-                        for idx, num in enumerate(colour['col']):
-                            avg_colour[idx] += weight * num
-                            # avg_colour.append(weight * num)
+                avg_colour = [0.0, 0.0, 0.0]
+                total = 10000.0
+                for colour in dom_colours:
+                    weight = colour['count'] / total
+                    for idx, num in enumerate(colour['col']):
+                        avg_colour[idx] += weight * num
+                        # avg_colour.append(weight * num)
 
-                    hist = histogram.calculate_hist(frame)
-                    hist_features[image_name] = hist
+                hist = histogram.calculate_hist(frame)
+                hist_features[image_name] = hist
 
-                    json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
-                                                  'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}, })
+                json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
+                                              'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}, })
 
-                    # 'frame_difference_magnitude': fi["diff_count"]
-                    if verbose:
-                        cv2.imshow('extract', frame)
-                        if cv2.waitKey(1) & 0xFF == ord('q'):
-                            break
+                # 'frame_difference_magnitude': fi["diff_count"]
+                if verbose:
+                    cv2.imshow('extract', frame)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
                 current_frame_num += jump_rate
                 frames_taken += 1
-
+            else:
+                print 'breaking'
+                break
         scene_num += 1
 
-        first_scene_first_frame = int(num_range[1])
+        left_scene_first_frame = int(num_range[1])
+        print 'AFTER left_scene_first_frame: ', left_scene_first_frame, ' right_scene_first_frame: ', right_scene_first_frame
     json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
     return hist_features
 

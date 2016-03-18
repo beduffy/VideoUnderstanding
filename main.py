@@ -134,6 +134,7 @@ process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsB
 #'/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4'
 
 '''
+    Animals6mins
     17 scene changes
     key frames for above:
     201-211
@@ -153,4 +154,17 @@ process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsB
     9931-8941 blackness of arm
     9571-9581
     10281-10291
+
+    DogsBabies5mins
+    100-200
+    2000-2100
+    2600-2700
+    4700-4800
+    7000-7100
+    8400-8500
+
+    multiplier 1.44 missing 4
+    multiplier 1.25 missing 1 scene change
+    0.676 missine none.
+    Loads of extra at end but not saving them???
 '''
