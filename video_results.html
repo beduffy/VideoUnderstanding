@@ -81,6 +81,7 @@
 								</g>
 							</svg>
 							<div>L2 Distance: {{dominant_colours.l2distnext}}</div>
+							<div>chi-dist: {{dominant_colours.chi_dist_next}}</div>
 
                             <div>Frame Number: {{frame_number}}</div>
 							<div>Time: {{divide frame_number}}s</div>
@@ -110,6 +111,7 @@
 									<div>{{this}}</div>
 								{{/each}}
 							</div>
+							<!--todo jquery hide show advanced options / extra info!!!!!-->
                         </div>
 					</div>
 				</td>"
@@ -316,9 +318,13 @@
 
 			$pageWrap.find('td').each(function() {
 				var $this = $(this);
-				if (lastSceneNumber !== parseInt($this.find('.scene_number_span').text())) {
-					lastSceneNumber = parseInt($this.find('.scene_number_span').text());
-					$this.find('.description').append("<div style='color: red;'>SCENE CHANGE</div>");
+				var this_scene_number = parseInt($this.find('.scene_number_span').text());
+				if (lastSceneNumber !== this_scene_number) {
+					lastSceneNumber = this_scene_number;
+
+					var htmlString = "<td><div class='frame' style='color: red;'>SCENE CHANGE from " + (lastSceneNumber - 1) + " to " + lastSceneNumber + "</div></td>";
+					$(htmlString).insertBefore($this);
+					$this.find('.description').append("");
 				}
 			})
 		});

@@ -41,6 +41,11 @@ def video_step_through(video_path):
             frame_number -= faster_rate
             changeImage(cap, frame_number)
 
+        if k == ord('i'):
+            requested_frame = int(raw_input())
+            if requested_frame >= 0: # And less than or equal to last frame
+                frame_number = requested_frame
+                changeImage(cap, frame_number)
         if k == ord('q'):
             break
 
@@ -55,7 +60,7 @@ def changeImage(cap, frame_number):
         return
 
     text = "frame_no: " + str(frame_number)
-    cv2.putText(frame, text, (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+    cv2.putText(frame, text, (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
     cv2.imshow('Frame', frame)
 
 def optical_flow(video_path):

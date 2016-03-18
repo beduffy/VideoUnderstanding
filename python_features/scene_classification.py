@@ -38,7 +38,7 @@ def batch_scene_classification(video_path, models):
         json_struct['images'][idx]['scene_results'] = []  #todo ????
         json_struct['images'][idx]['scene_results'] = {'scene_results1' : results1, 'scene_results2' : results2}
 
-    json.dump(json_struct, open(json_struct_path, 'w'))
+    json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
 def classify_scene(net, image_path):
     # TODO PROCESS ALL IMAGES FIRST?

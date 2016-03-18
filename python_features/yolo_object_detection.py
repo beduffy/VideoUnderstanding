@@ -62,7 +62,7 @@ def main_object_detect(json_struct, video_path):
         # sleep(0.04)
 
     print 'after json_struct:', json_struct
-    json.dump(json_struct, open(json_struct_path, 'w'))
+    json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
 
 # main_object_detect('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
