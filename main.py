@@ -114,7 +114,7 @@ process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6
 #'/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4'
 
 '''
-    17 scenes around
+    17 scene changes
     key frames for above:
     201-211
     971-981
