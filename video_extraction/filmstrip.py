@@ -185,326 +185,84 @@ def writeImagePyramid(destPath, name, seqNumber, image):
 # number of pixels that changed from the previous frame are more than 1.85 standard deviations
 # times from the mean number of changed pixels across all interframe changes.
 #
-def detectScenes2(sourcePath, destPath, data, name, json_struct, verbose=False):
-    destDir = os.path.join(destPath, "images")
 
-    # TODO make sd multiplier externally configurable
-    # diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
-    # diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
-    diff_threshold = (data["stats"]["sd"] * 3.5) + data["stats"]["mean"]
+def detect_scenes(cap, json_struct, data, verbose):
+    multiplier = 1.44
 
-    json_struct['images'] = [] # TODO OOOOOOO BIG MOVE
+    multplier_times_sd = (json_struct["stats"]["sd"] * multiplier)
+    mean_plus_multiplier_times_sd = multplier_times_sd + json_struct["stats"]["mean"]
 
-    scene_num = 0
+    all_chi_diffs = []
 
-    first_scene_first_frame = None
-    next_scene_first_frame = None
+    count = 0
+    for idx, fi in enumerate(data['frame_info']):
+        if fi['chi_diff'] > mean_plus_multiplier_times_sd:
+            right_frame_no = fi['frame_number']
+            left_frame_no = data['frame_info'][idx - 1]['frame_number']
 
-    hist_creator = histogram.RGBHistogram((8, 8, 8))
+            if verbose:
+                # TODO MAYBE CHANGE FRAMES TEXTS ON IMSHOW TO SAME SO LESS CLUTTER
+                cap.set(cv.CV_CAP_PROP_POS_FRAMES, right_frame_no)
+                ret, right_frame = cap.read()
 
-    hist_features = {}
+                frame_text = ('frame_no: {0} -- chi_diff: {1}').format(right_frame_no, data['frame_info'][idx - 1]["chi_diff"])
+                cv2.putText(right_frame, frame_text , (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+                cv2.imshow('left frame', right_frame)
 
-    cap = cv2.VideoCapture(sourcePath)
-    for index, fi in enumerate(data["frame_info"]):
-        if fi["diff_count"] < diff_threshold:
-            continue
+                # previous frame
+                cap.set(cv.CV_CAP_PROP_POS_FRAMES, left_frame_no)
+                ret, left_frame = cap.read()
 
-        if not first_scene_first_frame:
-            first_scene_first_frame = fi["frame_number"]
-            continue
+                frame_text = ('frame_no: {0} -- chi_diff: {1}').format(left_frame_no, data['frame_info'][idx - 1]["chi_diff"])
+                cv2.putText(left_frame, frame_text, (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
+                cv2.imshow('right frame', left_frame)
 
-        else:
-            next_scene_first_frame = fi["frame_number"]
+            # isolate down to 10 range
+            still_count, left_frame_no, right_frame_no = isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no)
 
-            num_frames_in_scene = 5
+            all_chi_diffs.append({'chi_diff': round(fi['chi_diff'], 4), 'frame_range_100': ('{0}-{1}').format(fi['frame_number'] - 100,  fi['frame_number']),
+                                  'frame_range_10': ('{0}-{1}').format(left_frame_no,  right_frame_no),
+                                  'sds_over_mean': round((fi['chi_diff'] - (json_struct["stats"]["mean"])) /  json_struct["stats"]["sd"], 4)})
+            count += 1
 
-            range = next_scene_first_frame - first_scene_first_frame
 
-            jump_rate = range / num_frames_in_scene
+    all_scene_changes_by_frame_no = sorted(all_chi_diffs, key=lambda k: int(k['frame_range_100'].split('-')[0]))
+    all_scene_changes_by_chi_diff = sorted(all_chi_diffs, key=lambda k: k['chi_diff'])
 
-            if jump_rate == 0:
-                num_frames_in_scene = range
-                jump_rate = 1
+    json_struct['scene_changes'] = all_scene_changes_by_frame_no
 
-            current_frame_num = first_scene_first_frame
+    if verbose:
+        for i in all_scene_changes_by_frame_no:
+            print i
+        print '\n\n'
 
-            print 'Saving scene frames between: ', first_scene_first_frame, '-', next_scene_first_frame
-            print 'Range: ', range, 'jump rate: ', jump_rate
-            print 'Scene number: ', scene_num
+        for i in all_scene_changes_by_chi_diff:
+            print i
 
-            frames_taken = 0
-            while frames_taken < num_frames_in_scene:
-                # todo have to really make sure no duplicates
-                # todo last scene don't add
-                # if frames_taken == num_frames_in_scene - 1:
-                #     current_frame_num = first_scene_first_frame
+    # TODO keep expanding this whole section so that when I change to other videos (videos with only 1-2 scenes) I can keep debugging
 
-                # last frame don't add
-                if current_frame_num != next_scene_first_frame:
-                    cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
-                    ret, frame = cap.read()
+    print 'multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd)
+    print "Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier)
 
-                    # todo all below into function
-                    # extract dominant color
-                    small = resize(frame, 100, 100)
-                    # Todo make 5 a global?
-                    dom_colours = extract_cols(small, 3)
-                    #  todo for now have k means data in other json file??
-                    # data["frame_info"][index]["dominant_cols"] = cols
+    return all_scene_changes_by_frame_no
 
-
-
-                    if frame != None:
-                        #TODO CHANGE ALL FI BELOW TO PROPER FRAME
-                        #writeImagePyramid(destDir, name, fi["frame_number"], frame)
-                        #todo png always?
-                        image_name = name + "-" + str(current_frame_num) + ".png"
-
-                        fullPath = os.path.join(destDir, "full", image_name)
-                        cv2.imwrite(fullPath, frame)
-
-                        print fullPath
-
-                        avg_colour = [0.0, 0.0, 0.0]
-                        total = 10000.0
-                        for colour in dom_colours:
-                            weight = colour['count'] / total
-                            for idx, num in enumerate(colour['col']):
-                                avg_colour[idx] += weight * num
-                                # avg_colour.append(weight * num)
-
-                        hist = hist_creator.describe(frame)
-
-                        hist_features[image_name] = hist
-
-                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
-                                                      'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}})
-
-                        if verbose:
-                            cv2.imshow('extract', frame)
-                            if cv2.waitKey(1) & 0xFF == ord('q'):
-                                break
-
-                    current_frame_num += jump_rate
-                    frames_taken += 1
-
-            first_scene_first_frame = next_scene_first_frame
-            scene_num += 1
-
-    num_images = len(json_struct['images'])
-    for idx, image in enumerate(json_struct['images']):
-        # if idx - 1 >= 0:
-        #     prev_image = json_struct['images'][idx - 1]
-        if idx + 1 == num_images:
-            break
-
-        next_avg_colour = json_struct['images'][idx + 1]['dominant_colours']['avg_colour']['col']
-        cur_avg_colour = image['dominant_colours']['avg_colour']['col']
-
-        # next_avg_colour = colorsys.rgb_to_hsv(next_avg_colour[0], next_avg_colour[1], next_avg_colour[2])
-        # cur_avg_colour = colorsys.rgb_to_hsv(cur_avg_colour[0], cur_avg_colour[1], cur_avg_colour[2])
-
-        # print 'next colour', next_avg_colour
-
-        next_avg_colour = rgb2lab(next_avg_colour)
-        cur_avg_colour = rgb2lab(cur_avg_colour)
-
-        # print 'next colour lab', next_avg_colour
-        # colorsys.
-        # dist = np.linalg.norm(next_avg_colour - cur_avg_colour)
-        dist = distance.euclidean(next_avg_colour, cur_avg_colour)
-
-        image['dominant_colours']['l2distnext'] = round(dist, 3)
-
-        # HISTOGRAM BELOW
-
-        # cur_hist = image['dominant_colours']['hist']
-        # next_hist = json_struct['images'][idx + 1]['dominant_colours']['hist']
-
-        cur_hist = hist_features[image['image_name']]
-        next_hist = hist_features[json_struct['images'][idx + 1]['image_name']]
-
-        chi_dist_next = histogram.chi2_distance(cur_hist, next_hist)
-
-        image['dominant_colours']['chi_dist_next'] = round(chi_dist_next, 3)
-
-
-    json_struct['info']['num_images'] = len(json_struct['images'])
-    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
-    json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
-    cap.release()
-    cv2.destroyAllWindows()
-    return data
-
-def detectScenes(sourcePath, destPath, data, name, json_struct, verbose=False):
-    dest_dir = os.path.join(destPath, "images")
-
-    # TODO make sd multiplier externally configurable
-    # diff_threshold = (data["stats"]["sd"] * 1.85) + data["stats"]["mean"]
-    # diff_threshold = (data["stats"]["sd"] * 2.5) + data["stats"]["mean"]
-    diff_threshold = (data["stats"]["sd"] * 3.5) + data["stats"]["mean"]
-
-    json_struct['images'] = []
-
-    scene_num = 0
-
-    first_scene_first_frame = None
-    next_scene_first_frame = None
-
-    hist_creator = histogram.RGBHistogram((8, 8, 8))
-
-    hist_features = {}
-
-    cap = cv2.VideoCapture(sourcePath)
-    for index, fi in enumerate(data["frame_info"]):
-        if fi["diff_count"] < diff_threshold:
-            continue
-
-        if not first_scene_first_frame:
-            first_scene_first_frame = fi["frame_number"]
-            continue
-
-        else:
-            next_scene_first_frame = fi["frame_number"]
-
-            num_frames_in_scene = 5
-            range = next_scene_first_frame - first_scene_first_frame
-            jump_rate = range / num_frames_in_scene
-            if jump_rate == 0:
-                num_frames_in_scene = range
-                jump_rate = 1
-
-            current_frame_num = first_scene_first_frame
-
-            print 'Saving scene frames between: ', first_scene_first_frame, '-', next_scene_first_frame
-            print 'Range: ', range, 'jump rate: ', jump_rate
-            print 'Scene number: ', scene_num
-
-            frames_taken = 0
-            while frames_taken < num_frames_in_scene:
-                # todo have to really make sure no duplicates
-                # todo last scene don't add
-                # if frames_taken == num_frames_in_scene - 1:
-                #     current_frame_num = first_scene_first_frame
-
-                # last frame don't add
-                if current_frame_num != next_scene_first_frame:
-                    cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
-                    ret, frame = cap.read()
-
-                    # todo separate everything into functions
-
-                    # extract dominant color
-                    small = resize(frame, 100, 100)
-                    # Todo make 5 a global?
-                    dom_colours = extract_cols(small, 3)
-
-                    if frame != None:
-                        #todo png always?
-                        image_name = name + "-" + str(current_frame_num) + ".png"
-
-                        fullPath = os.path.join(dest_dir, "full", image_name)
-                        cv2.imwrite(fullPath, frame)
-
-                        print fullPath
-
-                        avg_colour = [0.0, 0.0, 0.0]
-                        total = 10000.0
-                        for colour in dom_colours:
-                            weight = colour['count'] / total
-                            for idx, num in enumerate(colour['col']):
-                                avg_colour[idx] += weight * num
-                                # avg_colour.append(weight * num)
-
-                        hist = hist_creator.describe(frame)
-
-                        hist_features[image_name] = hist
-
-                        json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
-                                                      'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}, 'frame_difference_magnitude': fi["diff_count"]})
-
-                        if verbose:
-                            cv2.imshow('extract', frame)
-                            if cv2.waitKey(1) & 0xFF == ord('q'):
-                                break
-
-                    current_frame_num += jump_rate
-                    frames_taken += 1
-
-            first_scene_first_frame = next_scene_first_frame
-            scene_num += 1
-
-    num_images = len(json_struct['images'])
-    for idx, image in enumerate(json_struct['images']):
-        # if idx - 1 >= 0:
-        #     prev_image = json_struct['images'][idx - 1]
-        if idx + 1 == num_images:
-            break
-
-        next_avg_colour = json_struct['images'][idx + 1]['dominant_colours']['avg_colour']['col']
-        cur_avg_colour = image['dominant_colours']['avg_colour']['col']
-
-        # next_avg_colour = colorsys.rgb_to_hsv(next_avg_colour[0], next_avg_colour[1], next_avg_colour[2])
-        # cur_avg_colour = colorsys.rgb_to_hsv(cur_avg_colour[0], cur_avg_colour[1], cur_avg_colour[2])
-
-        # print 'next colour', next_avg_colour
-
-        next_avg_colour = rgb2lab(next_avg_colour)
-        cur_avg_colour = rgb2lab(cur_avg_colour)
-
-        # print 'next colour lab', next_avg_colour
-        # colorsys.
-        # dist = np.linalg.norm(next_avg_colour - cur_avg_colour)
-        dist = distance.euclidean(next_avg_colour, cur_avg_colour)
-
-        image['dominant_colours']['l2distnext'] = round(dist, 3)
-
-        # HISTOGRAM BELOW
-
-        # cur_hist = image['dominant_colours']['hist']
-        # next_hist = json_struct['images'][idx + 1]['dominant_colours']['hist']
-
-        cur_hist = hist_features[image['image_name']]
-        next_hist = hist_features[json_struct['images'][idx + 1]['image_name']]
-
-        chi_dist_next = histogram.chi2_distance(cur_hist, next_hist)
-
-        image['dominant_colours']['chi_dist_next'] = round(chi_dist_next, 3)
-
-
-    json_struct['info']['num_images'] = len(json_struct['images'])
-    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
-    json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
-    cap.release()
-    cv2.destroyAllWindows()
-    return data
-
-def find_key_frames(sourcePath, destPath, name, json_struct, verbose=False):
-    interval = 100
-    directory = os.path.dirname(sourcePath)
-
-    paused = False
-
-    frame_number = 0
+def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval):
+    # stores all chi differences between every 100 images.
     data = {
         "frame_info": []
     }
 
     cap = cv2.VideoCapture(sourcePath)
-
     ret, last_frame = cap.read()
+
+    frame_number = 0
     frame_number += interval
 
     while (cap.isOpened()):
-        if not paused:
-            cap.set(cv.CV_CAP_PROP_POS_FRAMES, frame_number)
-            ret, frame = cap.read()
+        cap.set(cv.CV_CAP_PROP_POS_FRAMES, frame_number)
+        ret, frame = cap.read()
 
         if frame != None:
-
-
-
-
             chi_diff = histogram.chi2_distance_two_images(frame, last_frame)
 
             frame_info = {
@@ -513,30 +271,24 @@ def find_key_frames(sourcePath, destPath, name, json_struct, verbose=False):
             }
             data["frame_info"].append(frame_info)
 
+            # todo no need to keep verbose?
             # if verbose:
             #     cv2.putText(frame, "chidiff = " + str(chi_diff), (600, 45), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
             #     cv2.imshow('frame', frame)
 
             k = cv2.waitKey(1)
-            if k == ord('s'):
-                paused = not paused
             if k == ord('q'):
                     break
-            # image_name = name + "-" + str(frame_number) + ".png"
 
-            # fullPath = os.path.join(dest_dir, image_name)
-            # cv2.imwrite(fullPath, frame)
-
-            # print fullPath
             last_frame = frame
         else:
             break
 
         frame_number += interval
 
-    #compute some stats
+    # Compute some stats
     chi_diff_counts = [fi["chi_diff"] for fi in data["frame_info"]]
-    data["stats"] = {
+    json_struct['stats'] = {
         "num": len(chi_diff_counts),
         "min": np.min(chi_diff_counts),
         "max": np.max(chi_diff_counts),
@@ -544,76 +296,155 @@ def find_key_frames(sourcePath, destPath, name, json_struct, verbose=False):
         "median": np.median(chi_diff_counts),
         "sd": np.std(chi_diff_counts)
     }
-    greater_than_mean = [fi for fi in data["frame_info"] if fi["chi_diff"] > data["stats"]["mean"]]
-    greater_than_median = [fi for fi in data["frame_info"] if fi["chi_diff"] > data["stats"]["median"]]
-    greater_than_one_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > data["stats"]["sd"] + data["stats"]["mean"]]
-    greater_than_two_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (data["stats"]["sd"] * 2) + data["stats"]["mean"]]
-    greater_than_three_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (data["stats"]["sd"] * 3) + data["stats"]["mean"]]
+    greater_than_mean = [fi for fi in data["frame_info"] if fi["chi_diff"] > json_struct["stats"]["mean"]]
+    greater_than_median = [fi for fi in data["frame_info"] if fi["chi_diff"] > json_struct["stats"]["median"]]
+    greater_than_one_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > json_struct["stats"]["sd"] + json_struct["stats"]["mean"]]
+    greater_than_two_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (json_struct["stats"]["sd"] * 2) + json_struct["stats"]["mean"]]
+    greater_than_three_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (json_struct["stats"]["sd"] * 3) + json_struct["stats"]["mean"]]
 
-    data["stats"]["greater_than_mean"] = len(greater_than_mean)
-    data["stats"]["greater_than_median"] = len(greater_than_median)
-    data["stats"]["greater_than_one_sd"] = len(greater_than_one_sd)
-    data["stats"]["greater_than_three_sd"] = len(greater_than_three_sd)
-    data["stats"]["greater_than_two_sd"] = len(greater_than_two_sd)
+    json_struct["stats"]["greater_than_mean"] = len(greater_than_mean)
+    json_struct["stats"]["greater_than_median"] = len(greater_than_median)
+    json_struct["stats"]["greater_than_one_sd"] = len(greater_than_one_sd)
+    json_struct["stats"]["greater_than_three_sd"] = len(greater_than_three_sd)
+    json_struct["stats"]["greater_than_two_sd"] = len(greater_than_two_sd)
 
-    data["stats"]['mean_plus_one_sd'] = (data["stats"]["sd"]) + data["stats"]["mean"]
-    data["stats"]['mean_plus_two_sd'] = (data["stats"]["sd"] * 2) + data["stats"]["mean"]
+    json_struct["stats"]['mean_plus_one_sd'] = (json_struct["stats"]["sd"]) + json_struct["stats"]["mean"]
+    json_struct["stats"]['mean_plus_two_sd'] = (json_struct["stats"]["sd"] * 2) + json_struct["stats"]["mean"]
 
+    # if verbose:
+    #     print json.dumps(json_struct, indent=4)
 
-    print json.dumps(data, indent=4)
+    return cap, data
 
-    cap.set(cv.CV_CAP_PROP_POS_FRAMES, 0)
+def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbose):
+    dest_dir = os.path.join(destPath, "images")
 
-    multiplier = 1.44
+    # TODO make sd multiplier externally configurable
+    # diff_threshold = (json_struct["stats"]["sd"] * 1.85) + json_struct["stats"]["mean"]
+    # diff_threshold = (json_struct["stats"]["sd"] * 2.5) + json_struct["stats"]["mean"]
+    diff_threshold = (json_struct["stats"]["sd"] * 3.5) + json_struct["stats"]["mean"]
 
-    multplier_times_sd = (data["stats"]["sd"] * multiplier)
-    mean_plus_multiplier_times_sd = multplier_times_sd + data["stats"]["mean"]
+    json_struct['images'] = []
 
-    all_chi_diffs = []
+    scene_num = 0
 
-    count = 0
-    for idx, fi in enumerate(data['frame_info']):
-        if fi['chi_diff'] > mean_plus_multiplier_times_sd:
-            # cap.set(cv.CV_CAP_PROP_POS_FRAMES, fi['frame_number'])
-            # ret, left_frame = cap.read()
+    hist_features = {}
 
-            # cv2.putText(frame, "frame_no: " + str(frame_number) + " chidiff: " + str(fi["chi_diff"]) , (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
-            # cv2.imshow(str(fi['frame_number']), frame)
+    INITIAL_NUM_FRAMES_IN_SCENE = 5
 
-            # previous frame
-            # cap.set(cv.CV_CAP_PROP_POS_FRAMES, previous_frame_number)
-            # ret, right_frame = cap.read()
+    # todo below into function ASAP
+    # FUNCTION CALLED create frames
+    first_scene_first_frame = 0
+    for scene_change in json_struct['scene_changes']:
+        num_range = scene_change['frame_range_100'].split('-')
+        next_scene_first_frame = int(num_range[0])
 
-            # isolate down to 10 range
-            right_frame_no = fi['frame_number']
-            left_frame_no = data['frame_info'][idx - 1]['frame_number']
-            still_count, left_frame_no, right_frame_no = isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no)
+        num_frames_in_scene = INITIAL_NUM_FRAMES_IN_SCENE
+        range = next_scene_first_frame - first_scene_first_frame
+        jump_rate = range / num_frames_in_scene
 
-            all_chi_diffs.append({'chi_diff': round(fi['chi_diff'], 4), 'frame_range_100': ('{0}-{1}').format(fi['frame_number'] - 100,  fi['frame_number']),
-                                  'frame_range_10': ('{0}-{1}').format(left_frame_no,  right_frame_no),
-                                  'sds_over_mean': round((fi['chi_diff'] - (data["stats"]["mean"])) /  data["stats"]["sd"], 4)})
-            count += 1
-            # cv2.putText(frame, 'frame_no: ' + str(previous_frame_number) + " chidiff: " + str(data['frame_info'][idx - 1]["chi_diff"]), (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
-            # cv2.imshow(str(previous_frame_number), frame)
+        # should NEVER HAPPEN
+        if jump_rate == 0:
+            num_frames_in_scene = range
+            jump_rate = 1
 
-    all_chi_diffs_by_frame_no = sorted(all_chi_diffs, key=lambda k: int(k['frame_range_100'].split('-')[0]))
-    for i in all_chi_diffs_by_frame_no:
-        print i
-    print '\n\n'
+        current_frame_num = first_scene_first_frame
 
-    all_chi_diffs_by_chi_diff = sorted(all_chi_diffs, key=lambda k: k['chi_diff'])
-    for i in all_chi_diffs_by_chi_diff:
-        print i
+        print 'Saving scene frames between: ', first_scene_first_frame, '-', next_scene_first_frame
+        print 'Range: ', range, 'jump rate: ', jump_rate
+        print 'Scene number: ', scene_num
 
+        frames_taken = 0
+        while frames_taken < num_frames_in_scene:
+            # last frame don't add???
+            if current_frame_num != next_scene_first_frame:
+                cap.set(cv.CV_CAP_PROP_POS_FRAMES, current_frame_num)
+                ret, frame = cap.read()
 
+                # todo separate everything into functions
 
-    # TODO keep expanding this whole section so that when I change to other videos (videos with only 1-2 scenes) I can keep debugging
+                # extract dominant color
+                small = resize(frame, 100, 100)
+                # Todo make 5 a global?
+                dom_colours = extract_cols(small, 3)
 
-    print 'multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd)
-    print "Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier)
+                if frame != None:
+                    #todo png always?
+                    image_name = name + "-" + str(current_frame_num) + ".png"
+
+                    fullPath = os.path.join(dest_dir, "full", image_name)
+                    cv2.imwrite(fullPath, frame)
+
+                    print fullPath
+
+                    avg_colour = [0.0, 0.0, 0.0]
+                    total = 10000.0
+                    for colour in dom_colours:
+                        weight = colour['count'] / total
+                        for idx, num in enumerate(colour['col']):
+                            avg_colour[idx] += weight * num
+                            # avg_colour.append(weight * num)
+
+                    hist = histogram.calculate_hist(frame)
+                    hist_features[image_name] = hist
+
+                    json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
+                                                  'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}, })
+
+                    # 'frame_difference_magnitude': fi["diff_count"]
+                    if verbose:
+                        cv2.imshow('extract', frame)
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
+
+                current_frame_num += jump_rate
+                frames_taken += 1
+
+        scene_num += 1
+
+        first_scene_first_frame = int(num_range[1])
+    json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
+    return hist_features
+
+def process_video(sourcePath, destPath, name, json_struct, verbose=False, interval=100):
+    cap, data = compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
+    detect_scenes(cap, json_struct, data, verbose)
+    hist_features = save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbose)
+    compute_avg_col_dist_and_chi_diff(hist_features, json_struct)
+    # TODO NEW FUNCTION
+
+    json_struct['info']['num_images'] = len(json_struct['images'])
+    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
 
     cap.release()
     cv2.destroyAllWindows()
+    # return data # TODO ???
+
+def compute_avg_col_dist_and_chi_diff(hist_features, json_struct):
+    # compute euclidian distance from avg colours. Then computer histogram chi distance between every consecutive frame.
+    num_images = len(json_struct['images'])
+    for idx, image in enumerate(json_struct['images']):
+        # if idx - 1 >= 0:
+        #     prev_image = json_struct['images'][idx - 1]
+        if idx + 1 == num_images:
+            break
+
+        next_avg_colour = json_struct['images'][idx + 1]['dominant_colours']['avg_colour']['col']
+        cur_avg_colour = image['dominant_colours']['avg_colour']['col']
+
+        # next_avg_colour = colorsys.rgb_to_hsv(next_avg_colour[0], next_avg_colour[1], next_avg_colour[2])
+        # cur_avg_colour = colorsys.rgb_to_hsv(cur_avg_colour[0], cur_avg_colour[1], cur_avg_colour[2])
+
+        next_avg_colour = rgb2lab(next_avg_colour)
+        cur_avg_colour = rgb2lab(cur_avg_colour)
+        dist = distance.euclidean(next_avg_colour, cur_avg_colour)
+        image['dominant_colours']['l2distnext'] = round(dist, 3)
+
+        # HISTOGRAM BELOW
+        cur_hist = hist_features[image['image_name']]
+        next_hist = hist_features[json_struct['images'][idx + 1]['image_name']]
+        chi_dist_next = histogram.chi2_distance(cur_hist, next_hist)
+        image['dominant_colours']['chi_dist_next'] = round(chi_dist_next, 3)
 
 def rgb2lab(rgb):
     def func(t):
@@ -726,8 +557,7 @@ def makeOutputDirs(path):
 
 
 def main_separate_scenes(json_struct, video_path, verbose=True):
-
-
+    # TODO rename above to process video and put process video inside here.
     directory = os.path.dirname(video_path)
     name = video_path.split('/')[-1][:-4]
 
@@ -737,32 +567,17 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     print 'Name of video:', name
     print
 
-    # if verbose:
-    info = getInfo(video_path)
-
-
-    # TODO STORE ANY INFO I CAN INSIDE JSON STRUCT SO I CAN SHOW IN HTML.
-
-    json_struct['info'] = info
+    json_struct['info'] = getInfo(video_path)
+    json_struct['info']['name'] = name
 
     makeOutputDirs(directory)
 
     # Run the extraction
+    # calculateFrameStats could still be useful
     # data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
     # data = detectScenes(video_path, directory, data, name, json_struct, verbose)
 
-    find_key_frames(video_path, directory, name, json_struct, verbose)
-
-    # # Write out the results
-    # data_fp = os.path.join(directory, "metadata", name + "-meta.json")
-    # with open(data_fp, 'w') as f:
-    #     data_json_str = json.dumps(data, indent=4)
-    #     f.write(data_json_str)
-    #
-    # keyframe_info_fp = os.path.join(directory, "metadata", name + "-keyframe-meta.json")
-    # with open(keyframe_info_fp, 'w') as f:
-    #     data_json_str = json.dumps(keyframeInfo, indent=4)
-    #     f.write(data_json_str)
+    process_video(video_path, directory, name, json_struct, verbose)
 
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
     json.dump(json_struct, open(json_path, 'w'), indent=4)

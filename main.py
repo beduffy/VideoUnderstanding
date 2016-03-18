@@ -27,6 +27,7 @@ import json
 import os
 import cv, cv2
 from timeit import default_timer as timer
+import webbrowser
 
 def process_video(video_path):
     directory = os.path.dirname(video_path)
@@ -39,12 +40,29 @@ def process_video(video_path):
             json_struct = json.load(data_file)
 
     start = timer()
-    filmstrip.main_separate_scenes(json_struct, video_path, False)
+    filmstrip.main_separate_scenes(json_struct, video_path, True)
     end = timer()
     print 'Time taken:', round((end - start), 5), 'seconds.'
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
+    # Average all results for scene()
+
+
+    # TODO open browser first and display alll prints there. Then animate into each section
+
+    # TODO or open browser and refresh after each step
+
+    # TODO video class? to access globals or just keep json_struct?
+
+    # tODO FIND best frame in scene most representative for gif
+
+    url = 'http://localhost:8000/video_results.html?video='
+
+    # Open URL in a new tab, if a browser window is already open.
+    webbrowser.open_new_tab(url + json_struct['info']['name'])
+
+    # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
 
 
 def create_tasks_file_from_json(json_struct_path):
@@ -103,7 +121,9 @@ def video_into_all_frames(video_path, interval=10):
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 
-process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+# process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+
+process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
 
