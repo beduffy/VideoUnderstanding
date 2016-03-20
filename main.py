@@ -28,6 +28,10 @@ import os
 import cv, cv2
 from timeit import default_timer as timer
 import webbrowser
+from pytube import api
+# from pytube import
+# not necessary, just for demo purposes.
+from pprint import pprint
 
 def process_video(video_path):
     directory = os.path.dirname(video_path)
@@ -39,10 +43,12 @@ def process_video(video_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    start = timer()
-    filmstrip.main_separate_scenes(json_struct, video_path, True)
-    end = timer()
-    print 'Time taken:', round((end - start), 5), 'seconds.'
+    # start = timer()
+    # filmstrip.main_separate_scenes(json_struct, video_path, True)
+    # end = timer()
+    # print 'Time taken:', round((end - start), 5), 'seconds.'
+
+    pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
@@ -57,13 +63,97 @@ def process_video(video_path):
 
     # tODO FIND best frame in scene most representative for gif
 
-    url = 'http://localhost:8000/video_results.html?video='
+    # url = 'http://localhost:8000/video_results.html?video='
 
     # Open URL in a new tab, if a browser window is already open.
-    webbrowser.open_new_tab(url + json_struct['info']['name'])
+    # webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
 
+def pytube_download_and_info(url):
+    yt = api.YouTube(url)
+
+    # Once set, you can see all the codec and quality options YouTube has made
+    # available for the perticular video by printing videos.
+
+    pprint(yt.get_videos())
+
+    # [<Video: MPEG-4 Visual (.3gp) - 144p>,
+    #  <Video: MPEG-4 Visual (.3gp) - 240p>,
+    #  <Video: Sorenson H.263 (.flv) - 240p>,
+    #  <Video: H.264 (.flv) - 360p>,
+    #  <Video: H.264 (.flv) - 480p>,
+    #  <Video: H.264 (.mp4) - 360p>,
+    #  <Video: H.264 (.mp4) - 720p>,
+    #  <Video: VP8 (.webm) - 360p>,
+    #  <Video: VP8 (.webm) - 480p>]
+
+    # The filename is automatically generated based on the video title.  You
+    # can override this by manually setting the filename.
+
+    # view the auto generated filename:
+    print(yt.filename)
+
+    # Pulp Fiction - Dancing Scene [HD]
+
+    # set the filename:
+    yt.set_filename('Dancing Scene from Pulp Fiction')
+
+    # You can also filter the criteria by filetype.
+    pprint(yt.filter('flv'))
+
+    # [<Video: Sorenson H.263 (.flv) - 240p>,
+    #  <Video: H.264 (.flv) - 360p>,
+    #  <Video: H.264 (.flv) - 480p>]
+
+    # Notice that the list is ordered by lowest resolution to highest. If you
+    # wanted the highest resolution available for a specific file type, you
+    # can simply do:
+    print(yt.filter('mp4')[-1])
+    # <Video: H.264 (.mp4) - 720p>
+
+    # You can also get all videos for a given resolution
+    pprint(yt.filter(resolution='480p'))
+
+    # [<Video: H.264 (.flv) - 480p>,
+    #  <Video: VP8 (.webm) - 480p>]
+
+    # To select a video by a specific resolution and filetype you can use the get
+    # method.
+
+    # video = yt.get('mp4', '720p')
+
+    # NOTE: get() can only be used if and only if one object matches your criteria.
+    # for example:
+
+    # pprint(yt.get_videos())
+
+    #[<Video: MPEG-4 Visual (.3gp) - 144p>,
+    # <Video: MPEG-4 Visual (.3gp) - 240p>,
+    # <Video: Sorenson H.263 (.flv) - 240p>,
+    # <Video: H.264 (.flv) - 360p>,
+    # <Video: H.264 (.flv) - 480p>,
+    # <Video: H.264 (.mp4) - 360p>,
+    # <Video: H.264 (.mp4) - 720p>,
+    # <Video: VP8 (.webm) - 360p>,
+    # <Video: VP8 (.webm) - 480p>]
+
+    # Since we have two H.264 (.mp4) available to us... now if we try to call get()
+    # on mp4...
+
+    video = yt.get('mp4', '720p')
+    # MultipleObjectsReturned: 2 videos met criteria.
+
+    # In this case, we'll need to specify both the codec (mp4) and resolution
+    # (either 360p or 720p).
+
+    # Okay, let's download it!
+    print 'downloading!'
+    # video.download()
+
+    # If you wanted to choose the output directory, simply pass it as an
+    # argument to the download method.
+    video.download('example_images')
 
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
