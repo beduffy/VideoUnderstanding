@@ -9,7 +9,19 @@ def main_object_detect(json_struct, video_path):
     image_directory_path = os.path.join(directory, 'images', 'full')
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
-    os.chdir('/home/ben/darknet')
+
+
+    # enter the directory like this:
+    with cd('/home/ben/darknet'):
+       # we are in ~/Library
+       subprocess.call("ls")
+
+
+    #TODO
+    #TODO
+    #TODO WHAT I DID ABOVE NEEDS CONTEXT MANAGER COZ IT MIGHT STAY IN DIRECTORY?
+
+    os.chdir()
     # darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights /home/ben/VideoUnderstanding/example_images/Animals6mins/images/full/Animals6mins-551.png"
     darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights"
     split_command = darknet_command.split(' ')

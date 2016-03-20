@@ -28,6 +28,7 @@ import os
 import cv, cv2
 from timeit import default_timer as timer
 import webbrowser
+from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
 from pytube import api
 # from pytube import
 # not necessary, just for demo purposes.
@@ -43,12 +44,16 @@ def process_video(video_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    # start = timer()
-    # filmstrip.main_separate_scenes(json_struct, video_path, True)
-    # end = timer()
-    # print 'Time taken:', round((end - start), 5), 'seconds.'
+    start = timer()
+    #TODO PRINT OUT WHEN SCENE SEPARATION STARTED AND ALL THE FUNCTIONS WHEN THEY START ETC
+    filmstrip.main_separate_scenes(json_struct, video_path, True)
+    end = timer()
+    print 'Time taken:', round((end - start), 5), 'seconds.'
 
-    pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
+    fast_rcnn_20.main_object_detect(json_struct, video_path)
+
+    print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
+    # pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
@@ -63,10 +68,10 @@ def process_video(video_path):
 
     # tODO FIND best frame in scene most representative for gif
 
-    # url = 'http://localhost:8000/video_results.html?video='
+    url = 'http://localhost:8000/video_results.html?video='
 
     # Open URL in a new tab, if a browser window is already open.
-    # webbrowser.open_new_tab(url + json_struct['info']['name'])
+    webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
 
@@ -210,6 +215,7 @@ def video_into_all_frames(video_path, interval=10):
 
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
+# TODO  show full json file in browser
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 

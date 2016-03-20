@@ -107,8 +107,8 @@
 							<br>
 							<div class="object_list">
 								<h2>Object Lists</h2>
-								{{#each object_lists}}
-									<div>{{this}}</div>
+								{{#each object_lists.faster_rcnn_20}}
+									<div>{{class}}: {{score}}</div>
 								{{/each}}
 							</div>
 							<!--todo jquery hide show advanced options / extra info!!!!!-->
