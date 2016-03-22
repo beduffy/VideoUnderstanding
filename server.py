@@ -4,8 +4,11 @@ import os
 import json
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for, send_file
 import main
+from flask_socketio import SocketIO, send, emit
 
 app = Flask(__name__, static_url_path='')
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 app.debug = True
 
 # landing page
@@ -23,28 +26,13 @@ def send_static_file(path):
 # download video
 @app.route('/download_video/', methods=['POST'])
 def download_video():
-    # print 'static file', path
-    print 'heyaaaaaaaa'
-
-    # url = request.form
-    # print 'data:', request.data
-    # print 'form', request.form
-    # print 'args ', request.args
     data = dict((key, request.form.getlist(key) if len(request.form.getlist(key)) > 1 else request.form.getlist(key)[0]) for key in request.form.keys())
     print 'data: ', data
 
     url = data.get('url')
     print 'url is: ', url
-    # url = request.form.get('url')
-    # url = request.args.get("url")
-    # url = json.loads(request.data)
-    # url = request.get_json()
-    # print 'URL received by server: ', url
-
 
     main.pytube_download_and_info(url)
-    # return send_from_directory('static', path)
-    # return 'hey'
     return url
 
 # process video
@@ -82,9 +70,73 @@ def get_json_struct(video_folder):
 
     return 'No json struct found!'
 
+# ALL FLASH SOCKETS BELOW
+
+def ack():
+    print 'message was received!'
+
+@socketio.on('message')
+def handle_message(message):
+    print('received message: ' + message)
+    send(message)
+
+@socketio.on('json')
+def handle_json(json):
+    print('received json: ' + str(json))
+    send(json, json=True)
+
+@socketio.on('my event')
+def handle_my_custom_event(json):
+    print('received json: ' + str(json))
+
+    send_print_event('hey hey hey')
+
+    # socketio.emit('some event', {'data': 42})
+
+# @socketio.on('my event')
+# def handle_my_custom_event(arg1, arg2, arg3):
+#     print('received args: ' + arg1 + arg2 + arg3)
+#     emit('my response', json, callback=ack)
+
+# todo understnad below sends client info. broadcast=true works too
+def send_print_event(json_data):
+    print 'sending:', json_data
+    socketio.emit('print_event', json_data)
+
+@socketio.on('connect')
+def test_connect():
+    print('Client connected')
+    emit('my response', {'data': 'Connected'})
+
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+
+@socketio.on_error_default       # Handles the default namespace
+def error_handler(e):
+    print 'INSIDE ERROR HANDLER'
+    print(request.event["message"]) # "my error event"
+    print(request.event["args"])    # (data,)
+
+
+#     TODO UNDERSTAND BELOW EXAMPLE
+# @socketio.on('my event')
+# def handle_my_custom_event(json):
+#     print('received json: ' + str(json))
+#     return 'one', 2
+
 if __name__ == "__main__":
     # app.run(host='0.0.0.0')
-    app.run()
+    # app.run()
+
+
+    print 'running socketio on app'
+    socketio.run(app)
+
+
+    #tpdp code doesnt get here.
     url_for('static', filename='video_results.css')
     url_for('static', filename='jquery.mousewheel.js')
     url_for('static', filename='handlebars-v4.0.5.js')
+
+    send_print_event('hey hey hey')

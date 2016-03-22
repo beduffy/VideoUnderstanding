@@ -28,11 +28,13 @@ import os
 import cv, cv2
 from timeit import default_timer as timer
 import webbrowser
-from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
+# from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
 from pytube import api
 # from pytube import
 # not necessary, just for demo purposes.
 from pprint import pprint
+
+from server import send_print_event
 
 def process_video(video_path):
     directory = os.path.dirname(video_path)
@@ -79,6 +81,9 @@ def pytube_download_and_info(url):
 
     # Once set, you can see all the codec and quality options YouTube has made
     # available for the perticular video by printing videos.
+
+    # todo doesnt work :(
+    send_print_event('pytube!!!!')
 
     pprint(yt.get_videos())
 

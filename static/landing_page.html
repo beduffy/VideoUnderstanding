@@ -172,19 +172,37 @@ in the process empty whole page and turn it into processing mode.-->
 <div id="new-videos">
     <h1>New Videos</h1>
 </div>
-
+<!--TODO fix youtube errors on this and my website once and for all-->
 <!--todo HIDE and show with animation. -->
 <div id="downloaded-videos">
     <h1>Downloaded Videos</h1>
 </div>
 
-<div>
+<div id="processed-videos">
     <h1>Processed Videos</h1>
+</div>
+
+<!--TODO better name than progress statements? console statements?-->
+<div id="progress-statements">
+
 </div>
 
 <!--<script src="https://apis.google.com/js/client.js?onload=OnLoadCallback"></script>-->
 
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
 
+    socket.on('print_event', function(data) {
+        console.log('receiving print event with data:', data);
+        var $line = $('<div>' + data + '<br></div>');
+        $('#progress-statements').append($line);
+//        socket.emit('my event', {data: 'client received some event'});
+    });
+</script>
 <script>
     //TODO show videos ive processed before. Undereneath each video can press process video. Must store processed videos in file or just list of directories?
     $(function() {
