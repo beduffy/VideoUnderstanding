@@ -9,16 +9,12 @@
 
 	<link rel="stylesheet" type="text/css" href="video_results.css">
 
-
     <style>
-	rect {
-		fill: steelblue;
-	}
 </style>
 
 </head>
 
-<script src="js/handlebars-v4.0.5.js"></script>
+<script src="handlebars-v4.0.5.js"></script>
 
 <body>
 <!--TODO make header bigger and descripts smaller and have different classes for all. -->
@@ -128,7 +124,7 @@
 	var globalData;
 
 	var frameWidth = 500.0;
-	var numDominantColours;;
+	var numDominantColours;
 	var QueryString = function () {
 	  // This function is anonymous, is executed immediately and
 	  // the return value is assigned to QueryString!
@@ -155,13 +151,14 @@
 	$(function() {
 		$("#page-wrap").wrapInner("<table cellspacing='30'><tr>");  //TODO GET RID OF?
 		var videoName = QueryString.video;
+		console.log('Video Name: ', videoName);
 		$('#video-title').text(videoName);
 
 		//TODO PUT TD ALL INSIDE TABLE!!!!! OUTSIDE AT THE MOMENT
-
+//		videoName = 'Animals6mins';
 		imageDirectory = 'example_images/' + videoName + '/';
-		var result_file_path = imageDirectory + '/metadata/result_struct.json';
-		loadDataset(result_file_path);
+//		var result_file_path = imageDirectory + '/metadata/result_struct.json';
+		loadDataset(videoName);
 
 		$("body").mousewheel(function(event, delta) {
 			//TODO fix when it hits the end
@@ -171,8 +168,14 @@
 	});
 
 	// Data Loading
-    function loadDataset(jsonpath) {
-		$.getJSON(jsonpath, function(data) {
+    function loadDataset(video_name) {
+		var url = "/get_json/" + video_name;
+		$.get(url, function(data, status) {
+			if (!data) {
+				console.log('Failure getting json');
+				return;
+			}
+			console.log(status);
 			console.log(data);
             console.log("Number of Images:", data.images.length);
 			globalData = data;
@@ -322,7 +325,7 @@
 				if (lastSceneNumber !== this_scene_number) {
 					lastSceneNumber = this_scene_number;
 
-					var htmlString = "<td><div class='frame' style='color: red;'>SCENE CHANGE from " + (lastSceneNumber - 1) + " to " + lastSceneNumber + "</div></td>";
+					var htmlString = "<td><div class='frame' style='color: red;'>SCENE CHANGE <br>from " + (lastSceneNumber - 1) + " to " + lastSceneNumber + "</div></td>";
 					$(htmlString).insertBefore($this);
 					$this.find('.description').append("");
 				}
