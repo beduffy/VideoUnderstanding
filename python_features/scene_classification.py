@@ -2,8 +2,10 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import json
+import sys
 
 caffe_root = '/home/ben/Downloads/caffe-master/'
+# print 'syspath', sys.path
 import caffe
 
 current_dir = os.path.dirname(__file__)

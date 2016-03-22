@@ -44,16 +44,15 @@ def process_video(video_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    start = timer()
-    #TODO PRINT OUT WHEN SCENE SEPARATION STARTED AND ALL THE FUNCTIONS WHEN THEY START ETC
-    filmstrip.main_separate_scenes(json_struct, video_path, True)
-    end = timer()
-    print 'Time taken:', round((end - start), 5), 'seconds.'
+    # start = timer()
+    # filmstrip.main_separate_scenes(json_struct, video_path, True)
+    # end = timer()
+    # print 'Time taken:', round((end - start), 5), 'seconds.'
 
-    fast_rcnn_20.main_object_detect(json_struct, video_path)
+    # fast_rcnn_20.main_object_detect(json_struct, video_path)
 
-    print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
-    # pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
+    # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
+    pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
@@ -68,10 +67,10 @@ def process_video(video_path):
 
     # tODO FIND best frame in scene most representative for gif
 
-    url = 'http://localhost:8000/video_results.html?video='
+    # url = 'http://localhost:8000/video_results.html?video='
 
     # Open URL in a new tab, if a browser window is already open.
-    webbrowser.open_new_tab(url + json_struct['info']['name'])
+    # webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
 
@@ -102,7 +101,7 @@ def pytube_download_and_info(url):
     # Pulp Fiction - Dancing Scene [HD]
 
     # set the filename:
-    yt.set_filename('Dancing Scene from Pulp Fiction')
+    # yt.set_filename('Dancing Scene from Pulp Fiction')
 
     # You can also filter the criteria by filetype.
     pprint(yt.filter('flv'))
@@ -153,12 +152,18 @@ def pytube_download_and_info(url):
     # (either 360p or 720p).
 
     # Okay, let's download it!
-    print 'downloading!'
-    # video.download()
+    print 'Downloading!'
 
     # If you wanted to choose the output directory, simply pass it as an
     # argument to the download method.
-    video.download('example_images')
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    video_folder_path = os.path.join(current_dir, 'example_images', yt.filename)
+    if not os.path.isdir(video_folder_path):
+        os.makedirs(video_folder_path)
+        video.download(video_folder_path)
+        print 'Finished downloading!'
+    else:
+        print 'Folder and file already there.'
 
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
@@ -219,7 +224,7 @@ def video_into_all_frames(video_path, interval=10):
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
-process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
+# process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
 
@@ -263,4 +268,6 @@ process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsB
     multiplier 1.25 missing 1 scene change
     0.676 missine none.
     Loads of extra at end but not saving them???
+
+     Walk down the times square (https://www.youtube.com/watch?v=ezyrSKgcyJw)
 '''

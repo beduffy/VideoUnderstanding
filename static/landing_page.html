@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Landing Page</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /*font-size: 62.5%;*/
+            font-family: 'Lucida Grande', Helvetica, sans-serif;
+            background: #ffffff;
+            color: #352899;  /*todo */
+            padding: 20px;
+        }
+
+        .video_holder {
+            width: 560px;
+            height: 400px;
+        }
+
+        .video_button {
+            background-color: white;
+
+            /*border: none;*/
+            /*color: white;*/
+            color: black;
+            border: 2px solid #008CBA;
+            border-radius: 14px;
+            /*box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);*/
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            -webkit-transition-duration: 0.4s; /* Safari */
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .video_button:hover {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+        }
+
+        .video_button:active {
+          background-color: #3e8e41;
+          box-shadow: 0 5px #666;
+          transform: translateY(4px);
+        }
+    </style>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+    <script>
+        function downloadVideo() {
+            var $this = $(this);
+            console.log("Download Video", $this);
+
+            var $videoHolder = $this.parent();
+
+            var embedUrl = $videoHolder.find('iframe').attr('src');
+            var splitUrl = embedUrl.split('/');
+            var videoID = splitUrl[splitUrl.length - 1].split('?')[0];
+
+            console.log('src:', embedUrl, 'videoID:', videoID);
+            //        var url = 'https://www.youtube.com/embed/YRor51Y35yA'
+
+
+            var watchUrl = 'https://www.youtube.com/watch?v=' + videoID;
+
+            var dataToSend = {'url': watchUrl};
+            console.log('data to send:', dataToSend);
+            $.post("/download_video/", dataToSend, function (data, status) {
+                console.log('Video Downloaded.');
+                console.log(data);
+//                console.log(status);
+            });
+            //TODO if fail of download return.
+
+            // Remove download video button
+            var $videoHolderClone = $videoHolder.clone();
+            $videoHolderClone.find('.download').remove();
+
+            // Add process video button
+            var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
+            var $processButton = $(processVideoButtonString);
+            $videoHolderClone.append($processButton);
+            $processButton.click(processVideo);
+
+            // Append new videoHolder to downloaded videos and remove old one from new videos
+            $('#downloaded-videos').append($videoHolderClone);
+            $videoHolder.remove();
+        }
+
+        function processVideo() {
+            var $this = $(this);
+            console.log("Process Video", $this);
+        }
+
+        function embedVideo() {
+            var downloadVideoButtonString = "<button class='video_button download' type=\"button\">Download Video</button>";
+
+
+            var url = $('#url').val();
+            console.log('inside func. Url is:', url);
+
+//        var videoID = 'p4kIwWHP8Vc';//working
+//        videoID = 'ezyrSKgcyJw';
+//        // todo LATER CHECK IF EXISTS
+//        $.ajax({
+////            url: "https://gdata.youtube.com/feeds/api/videos/" + videoID + "?v=2&alt=json",
+//            url: 'https://www.googleapis.com/youtube/v3/videos?id=' + video_id + '&key=YOUR_API_KEY&part=snippet';
+//            //dataType: "jsonp",
+//            success: function(data) {
+//                console.log('success');
+//                console.log(data);
+////                  $("#result").text(data);
+//            },
+//            error: function(jqXHR, textStatus, errorThrown)
+//                    {
+//                        // Handle errors here
+//                        console.log('error')
+//                        alert('ERRORS: ' + textStatus);
+//                    }
+//        });
+            var splitUrl = url.split('/');
+            var videoID = splitUrl[splitUrl.length - 1];
+            // hacky bit to get bit after 'v='
+            videoID = videoID.split('=')[1];
+
+            var embedString = "<div class='video_holder'><iframe src=\"https://www.youtube.com/embed/" + videoID +
+                    "?autoplay=1\" width=\"560\" height=\"315\" frameborder=\"0\" allowfullscreen></iframe></div>";
+//        console.log(embedString)
+
+
+            var $videoHolder = $(embedString);
+            $('#new-videos').append($videoHolder);
+
+            var $downloadButton = $(downloadVideoButtonString);
+            $videoHolder.append($downloadButton);
+
+            $downloadButton.click(downloadVideo);
+
+
+        }
+    </script>
+</head>
+<body>
+
+<div>
+    <h1>Choose a video</h1>
+</div>
+
+<div>
+    <form method="post" action="javascript:embedVideo();">
+        <label for="url">Please enter a youtube URL:</label>
+        <input id="url" type="text" name="url" size="60" value="https://www.youtube.com/watch?v=ezyrSKgcyJw" style="width: 600px; height: 40px; font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif; font-size:22px;"/><br />
+        <input class='video_button' type="submit" />
+    </form>
+</div>
+
+<!-- TODO NON DOWNLOADED VIDEOS go to new videos. Once download button clicked move to downloaded-videos. Once process button clicked goes to processed videos but
+in the process empty whole page and turn it into processing mode.-->
+<!--TODO Process again button AND SHOW RESULTS PAGE button-->
+
+<div id="new-videos">
+    <h1>New Videos</h1>
+</div>
+
+<!--todo HIDE and show with animation. -->
+<div id="downloaded-videos">
+    <h1>Downloaded Videos</h1>
+</div>
+
+<div>
+    <h1>Processed Videos</h1>
+</div>
+
+<!--<script src="https://apis.google.com/js/client.js?onload=OnLoadCallback"></script>-->
+
+
+<script>
+    //TODO show videos ive processed before. Undereneath each video can press process video. Must store processed videos in file or just list of directories?
+    $(function() {
+
+
+
+
+    });
+</script>
+</body>
+</html>
