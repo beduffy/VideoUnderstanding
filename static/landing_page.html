@@ -4,58 +4,20 @@
     <meta charset="UTF-8">
     <title>Landing Page</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
 
-        body {
-            /*font-size: 62.5%;*/
-            font-family: 'Lucida Grande', Helvetica, sans-serif;
-            background: #ffffff;
-            color: #352899;  /*todo */
-            padding: 20px;
-        }
 
-        .video_holder {
-            width: 560px;
-            height: 400px;
-        }
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-        .video_button {
-            background-color: white;
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
-            /*border: none;*/
-            /*color: white;*/
-            color: black;
-            border: 2px solid #008CBA;
-            border-radius: 14px;
-            /*box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);*/
-            padding: 16px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            -webkit-transition-duration: 0.4s; /* Safari */
-            transition-duration: 0.4s;
-            cursor: pointer;
-        }
-        .video_button:hover {
-            background-color: #4CAF50; /* Green */
-            color: white;
-            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-        }
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-        .video_button:active {
-          background-color: #3e8e41;
-          box-shadow: 0 5px #666;
-          transform: translateY(4px);
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="landing_page.css">
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
     <script>
         function downloadVideo() {
@@ -74,33 +36,73 @@
 
             var watchUrl = 'https://www.youtube.com/watch?v=' + videoID;
 
+            var videoName;
             var dataToSend = {'url': watchUrl};
             console.log('data to send:', dataToSend);
             $.post("/download_video/", dataToSend, function (data, status) {
                 console.log('Video Downloaded.');
                 console.log(data);
+                videoName = data; // todo for now
+
+                // Remove download video button
+                var $videoHolderClone = $videoHolder.clone();
+                $videoHolderClone.find('.download').remove();
+
+                // Add Title
+                console.log('name', videoName);
+                var titleString = '<h3 class="video_title">' + videoName + '</h3>';
+                $videoHolderClone.append(titleString);
+
+                // Add process video button
+                var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
+                var $processButton = $(processVideoButtonString);
+                $videoHolderClone.append($processButton);
+                $processButton.click(processVideo);
+
+                // Append new videoHolder to downloaded videos and remove old one from new videos
+                $('#downloaded-videos').append($videoHolderClone);
+                $videoHolder.remove();
 //                console.log(status);
             });
-            //TODO if fail of download return.
+            //TODO if fail of download return. or just do what i did above. Still need a fail function
 
-            // Remove download video button
-            var $videoHolderClone = $videoHolder.clone();
-            $videoHolderClone.find('.download').remove();
 
-            // Add process video button
-            var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
-            var $processButton = $(processVideoButtonString);
-            $videoHolderClone.append($processButton);
-            $processButton.click(processVideo);
-
-            // Append new videoHolder to downloaded videos and remove old one from new videos
-            $('#downloaded-videos').append($videoHolderClone);
-            $videoHolder.remove();
         }
 
         function processVideo() {
             var $this = $(this);
             console.log("Process Video", $this);
+            var $videoHolder = $this.parent();
+
+            var videoName = $videoHolder.find('.video_title').text();
+
+            var dataToSend = {'name': videoName};
+            console.log('data to send:', dataToSend);
+            $.post("/process_video/", dataToSend, function (data, status) {
+                console.log('Video Processed.');
+                console.log(data);
+
+
+                // Remove download video button
+//                var $videoHolderClone = $videoHolder.clone();
+//                $videoHolderClone.find('.download').remove();
+//
+//                // Add Title
+//                console.log('name', videoName);
+//                var titleString = '<h3 class="video_title">' + videoName + '</h3>';
+//                $videoHolderClone.append(titleString);
+//
+//                // Add process video button
+//                var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
+//                var $processButton = $(processVideoButtonString);
+//                $videoHolderClone.append($processButton);
+//                $processButton.click(processVideo);
+//
+//                // Append new videoHolder to downloaded videos and remove old one from new videos
+//                $('#downloaded-videos').append($videoHolderClone);
+//                $videoHolder.remove();
+//                console.log(status);
+            });
         }
 
         function embedVideo() {
@@ -153,38 +155,49 @@
 </head>
 <body>
 
-<div>
-    <h1>Choose a video</h1>
-</div>
+<div class="container-fluid">
+    <div class="col-sm-8">
+        <div>
+            <h1>Choose a video</h1>
+        </div>
 
-<div>
-    <form method="post" action="javascript:embedVideo();">
-        <label for="url">Please enter a youtube URL:</label>
-        <input id="url" type="text" name="url" size="60" value="https://www.youtube.com/watch?v=ezyrSKgcyJw" style="width: 600px; height: 40px; font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif; font-size:22px;"/><br />
-        <input class='video_button' type="submit" />
-    </form>
-</div>
+        <div>
+            <form method="post" action="javascript:embedVideo();">
+                <label for="url">Please enter a youtube URL:</label>
+                <input id="url" type="text" name="url" size="60" value="https://www.youtube.com/watch?v=ezyrSKgcyJw" style="width: 600px; height: 40px; font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif; font-size:22px;"/><br />
+                <input class='video_button' type="submit" />
+            </form>
+        </div>
 
-<!-- TODO NON DOWNLOADED VIDEOS go to new videos. Once download button clicked move to downloaded-videos. Once process button clicked goes to processed videos but
-in the process empty whole page and turn it into processing mode.-->
-<!--TODO Process again button AND SHOW RESULTS PAGE button-->
+        <!-- TODO NON DOWNLOADED VIDEOS go to new videos. Once download button clicked move to downloaded-videos. Once process button clicked goes to processed videos but
+        in the process empty whole page and turn it into processing mode.-->
+        <!--TODO Process again button AND SHOW RESULTS PAGE button-->
 
-<div id="new-videos">
-    <h1>New Videos</h1>
-</div>
-<!--TODO fix youtube errors on this and my website once and for all-->
-<!--todo HIDE and show with animation. -->
-<div id="downloaded-videos">
-    <h1>Downloaded Videos</h1>
-</div>
+        <div id="new-videos">
+            <h1>New Videos</h1>
+        </div>
+        <!--TODO fix youtube errors on this and my website once and for all-->
+        <!--todo HIDE and show with animation. -->
+        <div id="downloaded-videos">
+            <h1>Downloaded Videos</h1>
+        </div>
 
-<div id="processed-videos">
-    <h1>Processed Videos</h1>
-</div>
+        <div id="processed-videos">
+            <h1>Processed Videos</h1>
+        </div>
 
-<!--TODO better name than progress statements? console statements?-->
-<div id="progress-statements">
 
+    </div>
+    <div id="console" class="col-sm-4">
+        <!--TODO better name than progress statements? console statements?-->
+        <!--<div id="progress-statements">-->
+        <!---->
+        <!--</div>-->
+        <h1>Console</h1>
+        <div id="console-statements">
+
+        </div>
+    </div>
 </div>
 
 <!--<script src="https://apis.google.com/js/client.js?onload=OnLoadCallback"></script>-->
@@ -198,8 +211,8 @@ in the process empty whole page and turn it into processing mode.-->
 
     socket.on('print_event', function(data) {
         console.log('receiving print event with data:', data);
-        var $line = $('<div>' + data + '<br></div>');
-        $('#progress-statements').append($line);
+        var $line = $('<div>' + data + '</br></div>');
+        $('#console-statements').append($line);
 //        socket.emit('my event', {data: 'client received some event'});
     });
 </script>

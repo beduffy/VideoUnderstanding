@@ -105,11 +105,5 @@ def optical_flow(video_path):
 
 # video_step_through('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
-video_step_through('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
+# video_step_through('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 
-
-print distance.euclidean([0, 0, 0], [255, 255, 255])
-print distance.euclidean([0, 0, 0], [125, 255, 255])
-print distance.euclidean([0, 0, 0], [0, 255, 255])
-print distance.euclidean([0, 0, 0], [0, 0, 0])
-print distance.euclidean([0, 0, 0], [1, 1, 1])

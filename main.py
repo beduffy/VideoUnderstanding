@@ -30,60 +30,57 @@ from timeit import default_timer as timer
 import webbrowser
 # from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
 from pytube import api
-# from pytube import
-# not necessary, just for demo purposes.
 from pprint import pprint
-
-from server import send_print_event
+# from server import send_print_event
+from utilities.globals import log
 
 def process_video(video_path):
     directory = os.path.dirname(video_path)
     image_directory_path = os.path.join(directory, 'images', 'full')
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
+
+    # send_print_event('inside process video.main')
+
     json_struct = {'images': []}
     if os.path.isfile(json_struct_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    # start = timer()
-    # filmstrip.main_separate_scenes(json_struct, video_path, True)
-    # end = timer()
-    # print 'Time taken:', round((end - start), 5), 'seconds.'
+    start = timer()
+    filmstrip.main_separate_scenes(json_struct, video_path, False)
+    end = timer()
+    print 'Time taken:', round((end - start), 5), 'seconds.'
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
 
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
-    pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
+    # pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
     # Average all results for scene()
 
-
-    # TODO open browser first and display alll prints there. Then animate into each section
-
-    # TODO or open browser and refresh after each step
-
-    # TODO video class? to access globals or just keep json_struct?
-
-    # tODO FIND best frame in scene most representative for gif
-
-    # url = 'http://localhost:8000/video_results.html?video='
+    #todo for port number?
+    url = 'http://localhost:5000/video_results.html?video='
 
     # Open URL in a new tab, if a browser window is already open.
-    # webbrowser.open_new_tab(url + json_struct['info']['name'])
+    webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
 
-def pytube_download_and_info(url):
+def pytube_download_and_info(url, changed_name=None):
     yt = api.YouTube(url)
 
     # Once set, you can see all the codec and quality options YouTube has made
     # available for the perticular video by printing videos.
 
     # todo doesnt work :(
-    send_print_event('pytube!!!!')
+    # send_print_event('pytube!!!!')
+    # print 'socketio:', socketio
+    # socketio.emit('print_event', 'socketio working!!!!!')
+    # globals.s.s_print('SOCKETIO WORKING!!!!!')
+    log('inside pytube!!!!')
 
     pprint(yt.get_videos())
 
@@ -101,12 +98,17 @@ def pytube_download_and_info(url):
     # can override this by manually setting the filename.
 
     # view the auto generated filename:
-    print(yt.filename)
+
 
     # Pulp Fiction - Dancing Scene [HD]
 
     # set the filename:
-    # yt.set_filename('Dancing Scene from Pulp Fiction')
+    if changed_name:
+        yt.set_filename(changed_name)
+
+    yt.set_filename(yt.filename.replace(" ", "_"))
+
+    print 'Replacing spaces and changing name if needed: ', yt.filename
 
     # You can also filter the criteria by filetype.
     pprint(yt.filter('flv'))
@@ -170,6 +172,8 @@ def pytube_download_and_info(url):
     else:
         print 'Folder and file already there.'
 
+    return yt.filename
+
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
 
@@ -226,6 +230,10 @@ def video_into_all_frames(video_path, interval=10):
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 # TODO  show full json file in browser
+# TODO open browser first and display alll prints there. Then animate into each section
+# TODO or open browser and refresh after each step
+# TODO video class? to access globals or just keep json_struct?
+# tODO FIND best frame in scene most representative for gif
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
