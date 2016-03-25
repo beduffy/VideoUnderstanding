@@ -46,7 +46,7 @@ def download_video():
     # globals.s.s_print('url is: ')
     log('url download', url)
 
-    name = main.pytube_download_and_info(url)
+    name = main.download_video(url)
     return name
 
 # process video

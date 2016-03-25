@@ -7,6 +7,7 @@ import sys
 caffe_root = '/home/ben/Downloads/caffe-master/'
 # print 'syspath', sys.path
 import caffe
+from timeit import default_timer as timer
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -84,6 +85,8 @@ def classify_scene(net, image_path):
     return top_results
 
 def main_scene_classification(json_struct, video_path):
+    start = timer()
+
     places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
     googlenet205model = {'prototxt' : '/home/ben/VideoUnderstanding/python_features/deploy_places205.protxt', 'caffemodel' : '/home/ben/VideoUnderstanding/python_features/googlelet_places205_train_iter_2400000.caffemodel'}
 
@@ -93,15 +96,13 @@ def main_scene_classification(json_struct, video_path):
 
     batch_scene_classification(video_path, all_scene_models)
 
+    end = timer()
+    # TODO PRINT SCENE CLASSIFICIATION COMPLETE
+    print 'Time taken:', round((end - start), 5), 'seconds.'
+
 # batch_scene_classification('old_example_images', places205model['prototxt'], places205model['caffemodel'])
 
 # batch_scene_classification('old_example_images', '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel')
-
-
-
-
-
-
 
 
 

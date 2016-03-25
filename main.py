@@ -39,37 +39,27 @@ def process_video(video_path):
     image_directory_path = os.path.join(directory, 'images', 'full')
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
-
-    # send_print_event('inside process video.main')
-
     json_struct = {'images': []}
     if os.path.isfile(json_struct_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    start = timer()
     filmstrip.main_separate_scenes(json_struct, video_path, False)
-    end = timer()
-    print 'Time taken:', round((end - start), 5), 'seconds.'
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
-
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
-    # pytube_download_and_info("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
     # Average all results for scene()
 
-    #todo for port number?
-    url = 'http://localhost:5000/video_results.html?video='
-
     # Open URL in a new tab, if a browser window is already open.
+    url = 'http://localhost:5000/video_results.html?video='
     webbrowser.open_new_tab(url + json_struct['info']['name'])
 
-    # AJAX calls and make the whole system a server type system to see real cool loading effects in JavaScript? Overkill?
+    # TODO store video in processed videos of
 
-def pytube_download_and_info(url, changed_name=None):
+def download_video(url, changed_name=None):
     yt = api.YouTube(url)
 
     # Once set, you can see all the codec and quality options YouTube has made
@@ -108,7 +98,7 @@ def pytube_download_and_info(url, changed_name=None):
 
     yt.set_filename(yt.filename.replace(" ", "_"))
 
-    print 'Replacing spaces and changing name if needed: ', yt.filename
+    log('Replacing spaces and changing name if needed: ', yt.filename)
 
     # You can also filter the criteria by filetype.
     pprint(yt.filter('flv'))
@@ -120,7 +110,7 @@ def pytube_download_and_info(url, changed_name=None):
     # Notice that the list is ordered by lowest resolution to highest. If you
     # wanted the highest resolution available for a specific file type, you
     # can simply do:
-    print(yt.filter('mp4')[-1])
+    log(yt.filter('mp4')[-1])
     # <Video: H.264 (.mp4) - 720p>
 
     # You can also get all videos for a given resolution
@@ -158,8 +148,7 @@ def pytube_download_and_info(url, changed_name=None):
     # In this case, we'll need to specify both the codec (mp4) and resolution
     # (either 360p or 720p).
 
-    # Okay, let's download it!
-    print 'Downloading!'
+    log('Downloading!')
 
     # If you wanted to choose the output directory, simply pass it as an
     # argument to the download method.
@@ -168,63 +157,12 @@ def pytube_download_and_info(url, changed_name=None):
     if not os.path.isdir(video_folder_path):
         os.makedirs(video_folder_path)
         video.download(video_folder_path)
-        print 'Finished downloading!'
+        log('Finished downloading!')
     else:
-        print 'Folder and file already there.'
+        log('Folder and file already there.')
 
     return yt.filename
 
-def create_tasks_file_from_json(json_struct_path):
-    directory = os.path.dirname(json_struct_path)
-
-    json_struct = {}
-    with open(json_struct_path) as data_file:
-        json_struct = json.load(data_file)
-
-    tasks_path =  os.path.join(directory, 'tasks.txt')
-
-    file = open(tasks_path, 'w+')
-    num_images = len(json_struct['images'])
-    for idx, image in enumerate(json_struct['images']):
-        file.write(image['image_name']+'\n')
-        print image['image_name']
-
-    file.close()
-
-def video_into_all_frames(video_path, interval=10):
-    directory = os.path.dirname(video_path)
-    name = video_path.split('/')[-1][:-4]
-
-    if not os.path.isdir(os.path.join(directory, "all_frames")):
-        os.makedirs(os.path.join(directory, "all_frames"))
-
-    dest_dir = os.path.join(directory, "all_frames")
-
-    cap = cv2.VideoCapture(video_path)
-    frame_number = 1
-
-    while (cap.isOpened()):
-        cap.set(cv.CV_CAP_PROP_POS_FRAMES, frame_number)
-        ret, frame = cap.read()
-
-        if frame != None:
-            cv2.imshow('frame', frame)
-            #TODO CHANGE ALL FI BELOW TO PROPER FRAME
-            #writeImagePyramid(destDir, name, fi["frame_number"], frame)
-            #todo png always?
-            image_name = name + "-" + str(frame_number) + ".png"
-
-            fullPath = os.path.join(dest_dir, image_name)
-            cv2.imwrite(fullPath, frame)
-
-            print fullPath
-        else:
-            break
-
-        frame_number += interval
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 
 ##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
@@ -234,18 +172,12 @@ def video_into_all_frames(video_path, interval=10):
 # TODO or open browser and refresh after each step
 # TODO video class? to access globals or just keep json_struct?
 # tODO FIND best frame in scene most representative for gif
+#todo store port number?
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
-
 # process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
-
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
-
-
 # video_into_all_frames('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
-
-
-#'/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4'
 
 '''
     Animals6mins

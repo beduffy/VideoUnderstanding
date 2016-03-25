@@ -13,6 +13,8 @@ import errno
 import colorsys
 from skimage import io, color
 from python_features import histogram
+from utilities.globals import log
+from timeit import default_timer as timer
 
 def getInfo(sourcePath):
     cap = cv2.VideoCapture(sourcePath)
@@ -239,16 +241,16 @@ def detect_scenes(cap, json_struct, data, verbose):
 
     if verbose:
         for i in all_scene_changes_by_frame_no:
-            print i
-        print '\n\n'
+            log(i)
+        log('\n\n')
 
         for i in all_scene_changes_by_chi_diff:
-            print i
+            log(i)
 
     # TODO keep expanding this whole section so that when I change to other videos (videos with only 1-2 scenes) I can keep debugging
 
-    print 'multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd)
-    print "Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier)
+    log('multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd))
+    log("Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier))
 
     return all_scene_changes_by_frame_no
 
@@ -318,7 +320,7 @@ def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
     json_struct["stats"]['mean_plus_two_sd'] = (json_struct["stats"]["sd"] * 2) + json_struct["stats"]["mean"]
 
     # if verbose:
-    #     print json.dumps(json_struct, indent=4)
+    #     log(json.dumps(json_struct, indent=4))
 
     return cap, data
 
@@ -343,8 +345,8 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
     left_scene_first_frame = 0
     for scene_change in json_struct['scene_changes']:
         num_range = scene_change['frame_range_100'].split('-')
-        print num_range
-        print num_range[0], num_range[1]
+        log(num_range)
+        log(num_range[0], num_range[1])
         right_scene_first_frame = int(num_range[0])
 
         #TODO OR TAKE IT BACK TO WHAT IT WAS? NO POINT LOOKING AT A SCENE THATS ONLY A 100 FRAMES LONG. NOT WORTH IT. YEA I THINK IM RIGHT.
@@ -368,9 +370,9 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
 
         #MASSIVE BUG CANT GET FINAL FRAMES
 
-        print 'Saving scene frames between: ', left_scene_first_frame, '-', right_scene_first_frame
-        print 'Range: ', range, 'jump rate: ', jump_rate
-        print 'Scene number: ', scene_num
+        log('Saving scene frames between: ', left_scene_first_frame, '-', right_scene_first_frame)
+        log('Range: ', range, 'jump rate: ', jump_rate)
+        log('Scene number: ', scene_num)
 
         frames_taken = 0
         while frames_taken < num_frames_in_scene:
@@ -393,7 +395,7 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
                 fullPath = os.path.join(dest_dir, "full", image_name)
                 cv2.imwrite(fullPath, frame)
 
-                print fullPath
+                log(fullPath)
 
                 avg_colour = [0.0, 0.0, 0.0]
                 total = 10000.0
@@ -418,12 +420,12 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
                 current_frame_num += jump_rate
                 frames_taken += 1
             else:
-                print 'breaking'
+                log('breaking')
                 break
         scene_num += 1
 
         left_scene_first_frame = int(num_range[1])
-        print 'AFTER left_scene_first_frame: ', left_scene_first_frame, ' right_scene_first_frame: ', right_scene_first_frame
+        log('AFTER left_scene_first_frame: ', left_scene_first_frame, ' right_scene_first_frame: ', right_scene_first_frame)
     json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
     return hist_features
 
@@ -578,15 +580,17 @@ def makeOutputDirs(path):
 
 
 def main_separate_scenes(json_struct, video_path, verbose=True):
+    start = timer()
+
     # TODO rename above to process video and put process video inside here.
     directory = os.path.dirname(video_path)
     name = video_path.split('/')[-1][:-4]
 
-    print
-    print 'Video Path:', video_path
-    print 'Directory Path:', directory
-    print 'Name of video:', name
-    print
+    log('')
+    log('Video Path:', video_path)
+    log('Directory Path:', directory)
+    log('Name of video:', name)
+    log('')
 
     json_struct['info'] = getInfo(video_path)
     json_struct['info']['name'] = name
@@ -603,5 +607,8 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
     json.dump(json_struct, open(json_path, 'w'), indent=4)
 
-    print "Video Info: ", json_struct['info']
-    print "Video scene and frame extraction complete."
+    log("Video Info: ", json_struct['info'])
+    log("Video scene and frame extraction complete.")
+
+    end = timer()
+    print 'Time taken:', round((end - start), 5), 'seconds.'
