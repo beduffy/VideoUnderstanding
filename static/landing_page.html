@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Landing Page</title>
 
-
-
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -18,8 +16,29 @@
 
     <link rel="stylesheet" type="text/css" href="landing_page.css">
 
-
     <script>
+        var printToConsole = function(data) {
+            if (!data.color) {
+                data.color = 'white';
+            }
+
+            // HTML escape angled bracket
+            data.s = data.s.replace('<', '&lt;');
+
+            if (data.header) {
+                var htmlString = "<div style='color:{0};'><h{2}>{1}</h{2}></br></div>".format(data.color, data.s, data.header);
+            }
+            else {
+                var htmlString = "<div style='color:{0};'>{1}</br></div>".format(data.color, data.s);
+            }
+
+            // Append new line and scroll to bottom
+            var $line = $(htmlString);
+            $('#console-statements').append($line);
+            var elem = document.getElementById('console');
+            elem.scrollTop = elem.scrollHeight;
+        };
+
         function downloadVideo() {
             var $this = $(this);
             console.log("Download Video", $this);
@@ -65,10 +84,9 @@
 //                console.log(status);
             });
             //TODO if fail of download return. or just do what i did above. Still need a fail function
-
-
         }
 
+//        TODO TURN OFF BUTTON FOR A MINUTE OR SO
         function processVideo() {
             var $this = $(this);
             console.log("Process Video", $this);
@@ -149,7 +167,7 @@
 
             $downloadButton.click(downloadVideo);
 
-
+            printToConsole({s: 'Video Embedded.'});
         }
     </script>
 </head>
@@ -188,12 +206,14 @@
 
 
     </div>
+
+    <h1>Console</h1>
     <div id="console" class="col-sm-4">
         <!--TODO better name than progress statements? console statements?-->
         <!--<div id="progress-statements">-->
         <!---->
         <!--</div>-->
-        <h1>Console</h1>
+
         <div id="console-statements">
 
         </div>
@@ -202,27 +222,43 @@
 
 <!--<script src="https://apis.google.com/js/client.js?onload=OnLoadCallback"></script>-->
 
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-<script type="text/javascript" charset="utf-8">
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
-
-    socket.on('print_event', function(data) {
-        console.log('receiving print event with data:', data);
-        var $line = $('<div>' + data + '</br></div>');
-        $('#console-statements').append($line);
-//        socket.emit('my event', {data: 'client received some event'});
-    });
-</script>
+<!--<script  src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>-->
+<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
     //TODO show videos ive processed before. Undereneath each video can press process video. Must store processed videos in file or just list of directories?
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
     $(function() {
 
 
+        socket.on('connect', function() {
+            console.log('Connected to server');
+//            socket.emit('my event', {data: 'I\'m connected!'});
+        });
 
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+//            socket.emit('my event', {data: 'I\'m DISconnected!'});
+        });
 
+        if (!String.prototype.format) {
+            String.prototype.format = function() {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function(match, number) {
+                return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+            });
+            };
+        }
+
+        socket.on('print_event', function(data) {
+            //TODO all below into function?
+            console.log('data:', data); //debug
+
+            printToConsole(data);
+        });
     });
 </script>
 </body>

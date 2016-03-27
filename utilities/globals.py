@@ -1,28 +1,15 @@
 # from flask import Flask
 import os
-from flask_socketio import SocketIO
-# s = None
+from flask_socketio import SocketIO, emit
+import cv, cv2
+import json
 
-class SocketPrint:
-    socketio = None
+HEADER_SIZE = 3
 
-    def __init__(self, socket):
-        socketio = socket
-
-    def s_print(self, str):
-        print 'calling s_print'
-        print str
-        socketio.emit('print_event', str)
 
 def init_globals(app):
-    # global app = Flask(__name__, static_url_path='')
-    # app.config['SECRET_KEY'] = 'secret!'
-    # app.debug = True
     global socketio
     socketio = SocketIO(app)
-    global s
-    s = SocketPrint(socketio)
-
 
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
@@ -76,22 +63,32 @@ def video_into_all_frames(video_path, interval=10):
     cap.release()
     cv2.destroyAllWindows()
 
-def log(*args):
-    print 'inside log'
+def log(*args, **kwargs):
+    # print 'inside log ---------------------------------------'
     # todo might not need below 3 lines can just pass args to join?
     str_list = []
 
-    # print 'length: ', len(args)
+    for i, arg in enumerate(args):
+        # print i, str(arg)
+        str_list.append(str(arg))
 
-    for i in args:
-        str_list.append(str(i))
+    ret_str = ' '.join(str_list)
 
-    ret_str = ' '
-    ret_str = ret_str.join(str_list)
+    print 'string::::: ', ret_str
 
-    print ret_str
-    socketio.emit('print_event', ret_str)
-    # print str
-    # socketio.emit('print_event', str)
+    data_to_send = {'s': ret_str}
+
+    if not kwargs:
+        data_to_send['color'] = 'white'
+    else:
+        print 'kwargs', kwargs
+        data_to_send['color'] = kwargs.get('color', 'white')
+        print 'data_to_send', data_to_send
+        # if kwargs['header']:
+        #     print 'data_to_send', data_to_send
+        data_to_send['header'] = kwargs.get('header' , None)
+
+    print 'data_to_send', data_to_send
+    socketio.emit('print_event', data_to_send)
 
 

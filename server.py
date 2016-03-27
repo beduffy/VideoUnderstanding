@@ -3,28 +3,24 @@ __author__ = 'Ben'
 import os
 import json
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for, send_file
-
 from flask_socketio import SocketIO, send, emit
+# from flask.ext.socketio import SocketIO
 import utilities.globals as globals
-from utilities.globals import log
-
+from utilities.globals import log, HEADER_SIZE
+import thread
+import main
 
 app = Flask(__name__, static_url_path='')
 app.config['SECRET_KEY'] = 'secret!'
 
 globals.init_globals(app)
 
-import main
-
-# socketio = SocketIO(app)
-# s = globals.SocketPrint(socketio)
 # app.debug = True
 
 # landing page
 @app.route("/")
 def hello():
     return send_from_directory('static', 'landing_page.html')
-    # return "index path eventually???" #TODO
 
 # get static file
 @app.route('/<path:path>')
@@ -36,15 +32,9 @@ def send_static_file(path):
 @app.route('/download_video/', methods=['POST'])
 def download_video():
     data = dict((key, request.form.getlist(key) if len(request.form.getlist(key)) > 1 else request.form.getlist(key)[0]) for key in request.form.keys())
-    # print '-----------------data: ', str(data)
-    # globals.s.s_print('data: ')
-    log('data: ', data)
-
     url = data.get('url')
-    # print 'url is: ', url
 
-    # globals.s.s_print('url is: ')
-    log('url download', url)
+    log('Downloading youtube URL: ', url, header=HEADER_SIZE)
 
     name = main.download_video(url)
     return name
@@ -53,18 +43,14 @@ def download_video():
 @app.route('/process_video/', methods=['POST'])
 def process_video():
     data = dict((key, request.form.getlist(key) if len(request.form.getlist(key)) > 1 else request.form.getlist(key)[0]) for key in request.form.keys())
-    # print 'data: ', data
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
     video_path = os.path.join(current_dir, 'example_images', data['name'], data['name'] + '.mp4') #TODO VERY CAREFUL HERE MIGHT NOT BE MP4
 
-    # print video_path
+    thread.start_new_thread(main.process_video, (video_path, ))
 
-    main.process_video(video_path)
-
+    # todo change
     return 'Video has completed processing'
-    # print 'static file', path
-    # return send_from_directory('static', path)
 
 
 # get image
@@ -100,71 +86,19 @@ def get_json_struct(video_folder):
 def ack():
     print 'message was received!'
 
-# @socketio.on('message')
-# def handle_message(message):
-#     print('received message: ' + message)
-#     send(message)
-#
-# @socketio.on('json')
-# def handle_json(json):
-#     print('received json: ' + str(json))
-#     send(json, json=True)
-#
-# @socketio.on('my event')
-# def handle_my_custom_event(json):
-#     print('received json: ' + str(json))
-#
-#     send_print_event('hey hey hey')
+@globals.socketio.on('connect')
+def test_connect():
+    print('Client connected')
+    # emit('print_event', {'s': 'Connected to server', 'header' : 6})
+    log('Connected to server', header=4)
 
-    # socketio.emit('some event', {'data': 42})
-
-# @socketio.on('my event')
-# def handle_my_custom_event(arg1, arg2, arg3):
-#     print('received args: ' + arg1 + arg2 + arg3)
-#     emit('my response', json, callback=ack)
-
-# todo understnad below sends client info. broadcast=true works too
-# def send_print_event(json_data):
-#     print 'sending:', json_data
-#     print 'socketio:', socketio
-#     print 'socketio server:', socketio.server
-#
-#     socketio.emit('print_event', json_data)
-#
-# @socketio.on('connect')
-# def test_connect():
-#     print('Client connected')
-#     emit('my response', {'data': 'Connected'})
-#
-# @socketio.on('disconnect')
-# def test_disconnect():
-#     print('Client disconnected')
-#
-# @socketio.on_error_default       # Handles the default namespace
-# def error_handler(e):
-#     print 'INSIDE ERROR HANDLER'
-#     print(request.event["message"]) # "my error event"
-#     print(request.event["args"])    # (data,)
-#
-
-#     TODO UNDERSTAND BELOW EXAMPLE
-# @socketio.on('my event')
-# def handle_my_custom_event(json):
-#     print('received json: ' + str(json))
-#     return 'one', 2
+@globals.socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
 
 if __name__ == "__main__":
     # app.run(host='0.0.0.0')
     # app.run()
 
-    log('hey hey h3ey', 'hey', 'app,', '55555')
     print 'running socketio on app'
     globals.socketio.run(app)
-
-
-    #todo code doesnt get here.
-    url_for('static', filename='video_results.css')
-    url_for('static', filename='jquery.mousewheel.js')
-    url_for('static', filename='handlebars-v4.0.5.js')
-
-    # send_print_event('hey hey hey')

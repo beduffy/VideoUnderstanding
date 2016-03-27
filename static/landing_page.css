@@ -1,4 +1,4 @@
-* {
+        * {
             margin: 0;
             padding: 0;
         }
@@ -57,4 +57,15 @@
             color: #ccc;
             display: block;
             padding: 5px;
+            height:700px;
+            overflow:hidden;
+            overflow-y:scroll;
+            overflow-x:scroll;
         }
+
+        #console > h1, h2, h3, h4, h5, h6 {
+            margin: 0;
+        }
+
+        /*nav ul{; width:18%;}*/
+/*nav ul{; }*/

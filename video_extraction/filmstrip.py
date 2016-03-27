@@ -13,7 +13,7 @@ import errno
 import colorsys
 from skimage import io, color
 from python_features import histogram
-from utilities.globals import log
+from utilities.globals import log, HEADER_SIZE
 from timeit import default_timer as timer
 
 def getInfo(sourcePath):
@@ -582,22 +582,24 @@ def makeOutputDirs(path):
 def main_separate_scenes(json_struct, video_path, verbose=True):
     start = timer()
 
-    # TODO rename above to process video and put process video inside here.
+    # TODO rename above to process video and put process_video inside here.
     directory = os.path.dirname(video_path)
     name = video_path.split('/')[-1][:-4]
 
-    log('')
-    log('Video Path:', video_path)
-    log('Directory Path:', directory)
-    log('Name of video:', name)
-    log('')
+    # log('')
+    # log('Video Path:', video_path)
+    # log('Directory Path:', directory)
+    log('Processing video:', name, header=HEADER_SIZE)
+
+
+
+    # log('')
 
     json_struct['info'] = getInfo(video_path)
     json_struct['info']['name'] = name
 
     makeOutputDirs(directory)
 
-    # Run the extraction
     # calculateFrameStats could still be useful
     # data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
     # data = detectScenes(video_path, directory, data, name, json_struct, verbose)
@@ -609,6 +611,5 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
 
     log("Video Info: ", json_struct['info'])
     log("Video scene and frame extraction complete.")
-
     end = timer()
-    print 'Time taken:', round((end - start), 5), 'seconds.'
+    log('Time taken:', round((end - start), 5), 'seconds.')

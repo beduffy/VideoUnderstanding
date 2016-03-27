@@ -25,13 +25,11 @@ from python_features import scene_classification
 from python_features import yolo_object_detection
 import json
 import os
-import cv, cv2
 from timeit import default_timer as timer
 import webbrowser
 # from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
 from pytube import api
 from pprint import pprint
-# from server import send_print_event
 from utilities.globals import log
 
 def process_video(video_path):
@@ -54,23 +52,17 @@ def process_video(video_path):
     # Average all results for scene()
 
     # Open URL in a new tab, if a browser window is already open.
+    log('Opening browser tab with results')
     url = 'http://localhost:5000/video_results.html?video='
     webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # TODO store video in processed videos of
 
-def download_video(url, changed_name=None):
+def download_video(url,changed_name=None):
     yt = api.YouTube(url)
 
     # Once set, you can see all the codec and quality options YouTube has made
     # available for the perticular video by printing videos.
-
-    # todo doesnt work :(
-    # send_print_event('pytube!!!!')
-    # print 'socketio:', socketio
-    # socketio.emit('print_event', 'socketio working!!!!!')
-    # globals.s.s_print('SOCKETIO WORKING!!!!!')
-    log('inside pytube!!!!')
 
     pprint(yt.get_videos())
 
@@ -87,18 +79,13 @@ def download_video(url, changed_name=None):
     # The filename is automatically generated based on the video title.  You
     # can override this by manually setting the filename.
 
-    # view the auto generated filename:
-
-
-    # Pulp Fiction - Dancing Scene [HD]
-
     # set the filename:
     if changed_name:
         yt.set_filename(changed_name)
 
     yt.set_filename(yt.filename.replace(" ", "_"))
 
-    log('Replacing spaces and changing name if needed: ', yt.filename)
+    log('Video Name: ', yt.filename)
 
     # You can also filter the criteria by filetype.
     pprint(yt.filter('flv'))
@@ -165,9 +152,8 @@ def download_video(url, changed_name=None):
 
 
 
-##TODO MOVE ABOVE FUNCTION TO UTILTIIES?
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
-# TODO  show full json file in browser
+# TODO show full json file in browser
 # TODO open browser first and display alll prints there. Then animate into each section
 # TODO or open browser and refresh after each step
 # TODO video class? to access globals or just keep json_struct?
