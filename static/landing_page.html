@@ -59,16 +59,20 @@
             var dataToSend = {'url': watchUrl};
             console.log('data to send:', dataToSend);
             $.post("/download_video/", dataToSend, function (data, status) {
-                console.log('Video Downloaded.');
-                console.log(data);
+//                console.log('Video Downloaded.');
+//                console.log(data);
                 videoName = data; // todo for now
+
+                $('#downloaded-videos').find('.video_title').forEach(function() {
+
+                });
 
                 // Remove download video button
                 var $videoHolderClone = $videoHolder.clone();
                 $videoHolderClone.find('.download').remove();
 
                 // Add Title
-                console.log('name', videoName);
+//                console.log('name', videoName);
                 var titleString = '<h3 class="video_title">' + videoName + '</h3>';
                 $videoHolderClone.append(titleString);
 
@@ -83,6 +87,7 @@
                 $videoHolder.remove();
 //                console.log(status);
             });
+            toggleConsole();
             //TODO if fail of download return. or just do what i did above. Still need a fail function
         }
 
@@ -167,14 +172,15 @@
 
             $downloadButton.click(downloadVideo);
 
-            printToConsole({s: 'Video Embedded.'});
+            //TODO not necessary?
+//            printToConsole({s: 'Video Embedded.'});
         }
     </script>
 </head>
 <body>
 
 <div class="container-fluid">
-    <div class="col-sm-8">
+    <div id="all-videos" class="col-sm-12">
         <div>
             <h1>Choose a video</h1>
         </div>
@@ -207,15 +213,17 @@
 
     </div>
 
-    <h1>Console</h1>
-    <div id="console" class="col-sm-4">
-        <!--TODO better name than progress statements? console statements?-->
-        <!--<div id="progress-statements">-->
-        <!---->
-        <!--</div>-->
+    <div id="console-holder">
+        <h1>Console</h1>
+        <div id="console">
+            <!--TODO better name than progress statements? console statements?-->
+            <!--<div id="progress-statements">-->
+            <!---->
+            <!--</div>-->
 
-        <div id="console-statements">
+            <div id="console-statements">
 
+            </div>
         </div>
     </div>
 </div>
@@ -226,10 +234,32 @@
 <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
     //TODO show videos ive processed before. Undereneath each video can press process video. Must store processed videos in file or just list of directories?
+    var $console = $('#console-holder');
+    var $allVideos = $('#all-videos');
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var consoleOn = false;
+    function toggleConsole() {
+        consoleOn = !consoleOn;
+
+        if (!consoleOn) {
+            $console.removeClass('col-sm-6');
+            $allVideos.removeClass('col-sm-6');
+            $allVideos.addClass('col-sm-12');
+            $console.hide();
+        }
+        else {
+            $console.addClass('col-sm-6');
+            $allVideos.removeClass('col-sm-12');
+            $allVideos.addClass('col-sm-6');
+            $console.toggle('slide');
+        }
+
+    }
+
     $(function() {
+        $console.hide();
 
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
 
         socket.on('connect', function() {
             console.log('Connected to server');

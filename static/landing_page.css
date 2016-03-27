@@ -14,6 +14,7 @@
         .video_holder {
             width: 560px;
             height: 450px;
+            display: inline-block;
         }
 
         .video_button {
@@ -51,6 +52,21 @@
             color: #0BA008;
         }
 
+        /*body {*/
+            /*height: 100vh;*/
+        /*}*/
+
+        /*.container-fluid {*/
+            /*!*height: auto;*!*/
+            /*height: 100vh;*/
+        /*}*/
+
+        #all-videos {
+            overflow:hidden;
+            overflow-y:scroll;
+            height: auto;
+        }
+
         #console {
             background-color: #000;
             border: 3px groove #ccc;
@@ -66,6 +82,3 @@
         #console > h1, h2, h3, h4, h5, h6 {
             margin: 0;
         }
-
-        /*nav ul{; width:18%;}*/
-/*nav ul{; }*/
