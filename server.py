@@ -35,6 +35,7 @@ def download_video():
 
     log('Downloading youtube URL: ', url, header=HEADER_SIZE)
 
+    # todo stop js from clicking twice.
     name = main.download_video(url)
     return name
 

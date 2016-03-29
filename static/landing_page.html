@@ -39,19 +39,27 @@
             elem.scrollTop = elem.scrollHeight;
         };
 
+        var showResults = function(videoTitle) {
+            var urlToOpen = 'http://localhost:5000/video_results.html?video=' + videoTitle;
+//            console.log(event);
+//            console.log("opening", event.data.title);
+            var win = window.open(urlToOpen, '_blank');
+//            var win = window.open('http://localhost:5000/video_results.html?video=Walk_down_the_Times_Square_in_New_York', '_blank');
+            win.focus();
+        };
+
         function downloadVideo() {
             var $this = $(this);
             console.log("Download Video", $this);
 
+            $this.off();
+            // Future thingy todo set back or not?
             var $videoHolder = $this.parent();
 
             var embedUrl = $videoHolder.find('iframe').attr('src');
             var splitUrl = embedUrl.split('/');
             var videoID = splitUrl[splitUrl.length - 1].split('?')[0];
-
             console.log('src:', embedUrl, 'videoID:', videoID);
-            //        var url = 'https://www.youtube.com/embed/YRor51Y35yA'
-
 
             var watchUrl = 'https://www.youtube.com/watch?v=' + videoID;
 
@@ -61,33 +69,27 @@
             $.post("/download_video/", dataToSend, function (data, status) {
 //                console.log('Video Downloaded.');
 //                console.log(data);
+//                console.log(status);
+                printToConsole(status);
+                printToConsole(data);
+                printToConsole(console.log('Video Downloaded.'));
                 videoName = data; // todo for now
 
-//                $('#downloaded-videos').find('.video_title').forEach(function() {
-//
-//                });
-
                 // Remove download video button
-                var $videoHolderClone = $videoHolder.clone();
-                $videoHolderClone.find('.download').remove();
+                $videoHolder.find('.download').remove();
 
                 // Add Title
-//                console.log('name', videoName);
                 var titleString = '<h3 class="video_title">' + videoName + '</h3>';
-                $videoHolderClone.append(titleString);
+                $videoHolder.append(titleString);
 
+                //TODO ADD FUTURE PROMISE THINGY TO ONLY ADD PROCESS BUTTON WHEN DOWNLOADED COMPLETED.
                 // Add process video button
                 var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
                 var $processButton = $(processVideoButtonString);
-                $videoHolderClone.append($processButton);
+                $videoHolder.append($processButton);
                 $processButton.click(processVideo);
-
-                // Append new videoHolder to downloaded videos and remove old one from new videos
-                $('#downloaded-videos').append($videoHolderClone);
-                $videoHolder.remove();
-//                console.log(status);
             });
-            toggleConsole();
+
             //TODO if fail of download return. or just do what i did above. Still need a fail function
         }
 
@@ -105,59 +107,11 @@
             $.post("/process_video/", dataToSend, function (data, status) {
                 console.log('Video Processed.');
                 console.log(data);
-
-
-                // Remove download video button
-//                var $videoHolderClone = $videoHolder.clone();
-//                $videoHolderClone.find('.download').remove();
-//
-//                // Add Title
-//                console.log('name', videoName);
-//                var titleString = '<h3 class="video_title">' + videoName + '</h3>';
-//                $videoHolderClone.append(titleString);
-//
-//                // Add process video button
-//                var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Video</button>";
-//                var $processButton = $(processVideoButtonString);
-//                $videoHolderClone.append($processButton);
-//                $processButton.click(processVideo);
-//
-//                // Append new videoHolder to downloaded videos and remove old one from new videos
-//                $('#downloaded-videos').append($videoHolderClone);
-//                $videoHolder.remove();
-//                console.log(status);
             });
         }
 
-        function embedVideo(url1) {
-//            TODO SORT OUT PARAMETERS
-            var downloadVideoButtonString = "<button class='video_button download' type=\"button\">Download Video</button>";
-
-            if (!url1) {
-                var url = $('#url').val();
-            }
-//            else url1 = ur
-            console.log('inside func. Url is:', url);
-
-//        var videoID = 'p4kIwWHP8Vc';//working
-//        videoID = 'ezyrSKgcyJw';
-//        // todo LATER CHECK IF EXISTS
-//        $.ajax({
-////            url: "https://gdata.youtube.com/feeds/api/videos/" + videoID + "?v=2&alt=json",
-//            url: 'https://www.googleapis.com/youtube/v3/videos?id=' + video_id + '&key=YOUR_API_KEY&part=snippet';
-//            //dataType: "jsonp",
-//            success: function(data) {
-//                console.log('success');
-//                console.log(data);
-////                  $("#result").text(data);
-//            },
-//            error: function(jqXHR, textStatus, errorThrown)
-//                    {
-//                        // Handle errors here
-//                        console.log('error')
-//                        alert('ERRORS: ' + textStatus);
-//                    }
-//        });
+        var embedVideo = function(url, embedPlace, download, title) {
+            // forget checking if exists. Just copy right.
             var splitUrl = url.split('/');
             var videoID = splitUrl[splitUrl.length - 1];
             // hacky bit to get bit after 'v='
@@ -165,19 +119,42 @@
 
             var embedString = "<div class='video_holder' id='" + url + "'><iframe src=\"https://www.youtube.com/embed/" + videoID +
                     "?autoplay=1\" width=\"560\" height=\"315\" frameborder=\"0\" allowfullscreen></iframe></div>";
-//        console.log(embedString)
-
 
             var $videoHolder = $(embedString);
-            $('#new-videos').append($videoHolder);
+            embedPlace.append($videoHolder);
 
-            var $downloadButton = $(downloadVideoButtonString);
-            $videoHolder.append($downloadButton);
+            // Add download button
+            if (download) {
+                $('#new-videos').show(750);
+                setTimeout(function() {
+                    var elem = document.getElementById("all-videos");
+                    elem.scrollTop = elem.scrollHeight;
+                }, 750);
 
-            $downloadButton.click(downloadVideo);
+                var downloadVideoButtonString = "<button class='video_button download' type=\"button\">Download Video</button>";
+                var $downloadButton = $(downloadVideoButtonString);
+                $videoHolder.append($downloadButton);
+                $downloadButton.click(downloadVideo);
+            }
 
-            //TODO not necessary?
-//            printToConsole({s: 'Video Embedded.'});
+            if (typeof title !== 'undefined') {
+                // Already processed before
+                // if title exists add title to video holder and add process again button
+                var titleString = '<h3 class="video_title">' + title + '</h3>';
+                $videoHolder.append(titleString);
+
+                var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Again</button>";
+                var $processButton = $(processVideoButtonString);
+                $videoHolder.append($processButton);
+                $processButton.click(processVideo);
+
+                var showResultsButtonString = "<button class='video_button process' type=\"button\">Show Results</button>";
+                var $showResultsButton = $(showResultsButtonString);
+                $videoHolder.append($showResultsButton);
+                $showResultsButton.click(function() {
+                    showResults(title);
+                });
+            }
         }
     </script>
 </head>
@@ -186,49 +163,35 @@
 <div class="container-fluid">
     <div id="all-videos" class="col-sm-12">
         <div>
+            <!--TODO more header stuff here-->
             <h1>Choose a video</h1>
         </div>
 
         <div>
-            <form method="post" action="javascript:embedVideo();">
-                <label for="url">Please enter a youtube URL:</label>
-                <input id="url" type="text" name="url" size="60" value="https://www.youtube.com/watch?v=ezyrSKgcyJw" style="width: 600px; height: 40px; font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif; font-size:22px;"/><br />
-                <input class='video_button' type="submit" />
-            </form>
+            <label for="url-form">Please enter a youtube URL:</label>
+            <input id="url-form" type="text" name="url" size="60" value="" style="width: 600px; height: 40px; font-family:'Lucida Sans Unicode', 'Lucida Grande', sans-serif; font-size:22px;"/><br />
+            <!--<input class='video_button' id="post-form" type="submit" />-->
+            <button class='video_button' id="post-form" >Submit</button>
         </div>
 
-        <!-- TODO NON DOWNLOADED VIDEOS go to new videos. Once download button clicked move to downloaded-videos. Once process button clicked goes to processed videos but
-        in the process empty whole page and turn it into processing mode.-->
-        <!--TODO Process again button AND SHOW RESULTS PAGE button-->
 
-        <div id="new-videos">
-            <h1>New Videos</h1>
-        </div>
         <!--TODO fix youtube errors on this and my website once and for all-->
-        <!--todo HIDE and show with animation. -->
-        <div id="downloaded-videos">
-            <h1>Downloaded Videos</h1>
-        </div>
 
         <div id="processed-videos">
             <h1>Processed Videos</h1>
         </div>
 
-
-    </div>
-
-    <div id="console-holder">
-        <h1>Console</h1>
-        <div id="console">
-            <!--TODO better name than progress statements? console statements?-->
-            <!--<div id="progress-statements">-->
-            <!---->
-            <!--</div>-->
-
-            <div id="console-statements">
-
-            </div>
+        <!--todo HIDE and show with animation when new video comes?. -->
+        <div id="new-videos">
+            <h1>New Videos</h1>
         </div>
+    </div>
+</div>
+
+<div id="console-holder">
+    <h1>Console</h1>
+    <div id="console">
+        <div id="console-statements"></div>
     </div>
 </div>
 
@@ -237,31 +200,9 @@
 <!--<script  src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>-->
 <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-    //TODO show videos ive processed before. Undereneath each video can press process video. Must store processed videos in file or just list of directories?
-    var $console = $('#console-holder');
-    var $allVideos = $('#all-videos');
-
-    var consoleOn = false;
-    function toggleConsole() {
-        consoleOn = !consoleOn;
-
-        if (!consoleOn) {
-            $console.removeClass('col-sm-6');
-            $allVideos.removeClass('col-sm-6');
-            $allVideos.addClass('col-sm-12');
-            $console.hide();
-        }
-        else {
-            $console.addClass('col-sm-6');
-            $allVideos.removeClass('col-sm-12');
-            $allVideos.addClass('col-sm-6');
-            $console.toggle('slide');
-        }
-
-    }
 
     $(function() {
-        $console.hide();
+        $('#new-videos').hide();
 
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
@@ -275,16 +216,30 @@
 //            socket.emit('my event', {data: 'I\'m DISconnected!'});
         });
 
-        var url = '/get_all_videos';
-        $.get(url, function(data, status) {
+        socket.on('print_event', function(data) {
+            //TODO all below into function?
+            console.log('data:', data); //debug
+
+            printToConsole(data);
+        });
+
+        $('#post-form').click(function() {
+            var url_from_form = $('#url-form').val();
+            console.log('Sending url func. Url is:', url_from_form);
+            embedVideo(url_from_form, $('#new-videos'), true)
+        });
+
+        var get_json_url = '/get_all_videos';
+        $.get(get_json_url, function(data, status) {
             if (!data) {
                 console.log('Failure getting json');
                 return;
             }
             console.log('all_videos:', data);
 
+            var $processedVideos = $('#processed-videos');
             for (var i = 0; i < data.videos.length; i++) {
-                embedVideo
+                embedVideo(data.videos[i].video_url, $processedVideos, false, data.videos[i].video_name);
             }
         });
 
@@ -300,12 +255,7 @@
             };
         }
 
-        socket.on('print_event', function(data) {
-            //TODO all below into function?
-            console.log('data:', data); //debug
 
-            printToConsole(data);
-        });
     });
 </script>
 </body>

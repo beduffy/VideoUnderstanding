@@ -45,7 +45,9 @@ def process_video(video_path, video_url):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    # filmstrip.main_separate_scenes(json_struct, video_path, False)
+    # main processing sub functions ------------------
+
+    filmstrip.main_separate_scenes(json_struct, video_path, False)
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
@@ -53,6 +55,8 @@ def process_video(video_path, video_url):
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
     # Average all results for scene()
+
+    # ---------------------------------
 
     # Open URL in a new tab, if a browser window is already open.
     log('Opening browser tab with results')
@@ -149,7 +153,24 @@ def download_video(url,changed_name=None):
     # Since we have two H.264 (.mp4) available to us... now if we try to call get()
     # on mp4...
 
-    video = yt.get('mp4', '720p')
+    # video = yt.get('mp4', '720p')
+    print 'get videos: ', yt.get_videos()
+    print
+
+    all_videos = {}
+    highest_res_idx = -1
+    highest_res = -500
+    for idx, vid_string in enumerate(yt.get_videos()):
+        print vid_string
+        split_string = vid_string.split('-')
+        resolution = int(split_string[1].strip()[:-1])
+
+        all_videos['bla']
+        print resolution
+        if resolution > highest_res:
+            highest_res = resolution
+            highest_res_idx = idx
+    # video = yt.get_videos()
     # MultipleObjectsReturned: 2 videos met criteria.
 
     # In this case, we'll need to specify both the codec (mp4) and resolution
@@ -163,8 +184,13 @@ def download_video(url,changed_name=None):
     video_folder_path = os.path.join(current_dir, 'example_images', yt.filename)
     if not os.path.isdir(video_folder_path):
         os.makedirs(video_folder_path)
-        video.download(video_folder_path)
-        log('Finished downloading!')
+        try:
+            video.download(video_folder_path)
+            log('Finished downloading!')
+        except:
+            #TODO TODO TODO TEST TEST TEST TEST BELOW CAREFUL
+            os.rmdir(video_folder_path)
+
     else:
         log('Folder and file already there.')
 
