@@ -76,3 +76,14 @@ h1 { font-family: Helvetica, sans-serif; font-size: 4.0em;
 							  /*letter-spacing: -1px; color: #ccc; }*/
 a { color: #0066cc; }
 a:hover { color: #ccc; }
+
+#scroll-bar {
+	height: 70px;
+    width: 500px;
+    background-color: blue;
+    top: 10%;
+    left: 50%;
+    position: fixed;
+    margin-top: -100px;
+    margin-left: -250px;
+}

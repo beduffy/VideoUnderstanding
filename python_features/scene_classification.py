@@ -3,11 +3,12 @@ import os
 import matplotlib.pyplot as plt
 import json
 import sys
-
+#todo clean
 caffe_root = '/home/ben/Downloads/caffe-master/'
 # print 'syspath', sys.path
 import caffe
 from timeit import default_timer as timer
+from utilities.globals import log, HEADER_SIZE
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -35,11 +36,11 @@ def batch_scene_classification(video_path, models):
     num_images = len(json_struct['images'])
     for idx, image in enumerate(json_struct['images']):
         image_path = os.path.join(image_directory_path, image['image_name'])
-        # print 'scene %d/%d' % (idx. num_images) TODO CRASHES HERE AttributeError: 'int' object has no attribute 'num_images'
         results1 = classify_scene(net0, image_path)
         results2 = classify_scene(net1, image_path)
         json_struct['images'][idx]['scene_results'] = []  #todo ????
         json_struct['images'][idx]['scene_results'] = {'scene_results1' : results1, 'scene_results2' : results2}
+        log('Image {}/{} scene classified'.format(idx, num_images))
 
     json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
@@ -50,7 +51,7 @@ def classify_scene(net, image_path):
     transformer.set_transpose('data', (2,0,1))
     transformer.set_mean('data', np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1)) # mean pixel
     transformer.set_raw_scale('data', 255)  # the reference model operates on images in [0,255] range instead of [0,1]
-    transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
+    # transformer.set_channel_swap('dataprint', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
     # set net to batch size of 50
     # net.blobs['data'].reshape(50,3,227,227)
@@ -62,7 +63,7 @@ def classify_scene(net, image_path):
     out = net.forward()
     # print("Predicted class is #{}.".format(out['prob'][0].argmax()))
 
-    plt.imshow(transformer.deprocess('data', net.blobs['data'].data[0]))
+    # plt.imshow(transformer.deprocess('data', net.blobs['data'].data[0]))
 
     # load labels
     # imagenet_labels_filename = caffe_root + 'data/ilsvrc12/synset_words.txt'
@@ -71,20 +72,22 @@ def classify_scene(net, image_path):
 
     # sort top k predictions from softmax output
     top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
-    # print 'xxxxx', net.blobs['prob'].data[0]
-    # print 'xxxxx', net.blobs['prob'].data[0].flatten()
-    # print 'xxxxx', net.blobs['prob'].data[0].flatten().argsort()[::-1]
-    # print 'xxxxx', labels[top_k]
+    # log 'xxxxx', net.blobs['prob'].data[0]
+    # log 'xxxxx', net.blobs['prob'].data[0].flatten()
+    # log 'xxxxx', net.blobs['prob'].data[0].flatten().argsort()[::-1]
+    # log 'xxxxx', labels[top_k]
 
     top_results = []
 
     for index in top_k:
         # print labels[index], net.blobs['prob'].data[0].flatten()[index]
+        # TODO str below is a slow way of doing it. flattening every time.
         top_results.append({'label' : labels[index], 'probability' : str(net.blobs['prob'].data[0].flatten()[index])})
 
     return top_results
 
 def main_scene_classification(json_struct, video_path):
+    log('Starting Scene Classification', header=HEADER_SIZE)
     start = timer()
 
     places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
@@ -97,8 +100,8 @@ def main_scene_classification(json_struct, video_path):
     batch_scene_classification(video_path, all_scene_models)
 
     end = timer()
-    # TODO PRINT SCENE CLASSIFICIATION COMPLETE
-    print 'Time taken:', round((end - start), 5), 'seconds.'
+    log('Scene Classification complete', header=HEADER_SIZE)
+    log('Time taken:', round((end - start), 5), 'seconds')
 
 # batch_scene_classification('old_example_images', places205model['prototxt'], places205model['caffemodel'])
 

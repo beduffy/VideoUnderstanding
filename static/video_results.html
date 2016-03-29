@@ -9,15 +9,14 @@
 
 	<link rel="stylesheet" type="text/css" href="video_results.css">
 
-    <style>
-</style>
-
 </head>
 
 <script src="handlebars-v4.0.5.js"></script>
 
 <body>
 <!--TODO make header bigger and descripts smaller and have different classes for all. -->
+	<div id="scroll-bar"></div>
+
 	<div id="header">
 		<h1 id="video-title"></h1>
 		<script id="header-template" type="text/x-handlebars-template">
@@ -34,7 +33,7 @@
 
 	<div id="page-wrap">
 		<!--{{#if checkSceneChange scene_num}}-->
-								<!--<div>GAY GAY GAY GAYT GAY GAEFRGEAGREAGARGEA</div>-->
+								<!--<div>GAEFRGEAGREAGARGEA</div>-->
 							<!--{{/if}}-->
 
 		<!--{{#if @last.scene_num '==' "212" }}-->
@@ -106,6 +105,9 @@
 								{{#each object_lists.faster_rcnn_20}}
 									<div>{{class}}: {{score}}</div>
 								{{/each}}
+								{{#each object_lists.yolo_20}}
+									<div>{{class}}: {{score}}</div>
+								{{/each}}
 							</div>
 							<!--todo jquery hide show advanced options / extra info!!!!!-->
                         </div>
@@ -114,7 +116,7 @@
 			{{/each}}
 		</script>
 	</div>
-
+<!--todo replace below with downloaded jquery and above-->
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="jquery.mousewheel.js"></script>
 <script>
@@ -154,6 +156,52 @@
 		console.log('Video Name: ', videoName);
 		$('#video-title').text(videoName);
 
+
+//		$("#scrollBar").click(function(e){
+//		   var parentOffset = $(this).parent().offset();
+//		   //or $(this).offset(); if you really just want the current element's offset
+//		   var relX = e.pageX - parentOffset.left;
+//		   var relY = e.pageY - parentOffset.top;
+//		console.log('relX:', relX, 'relY:', relY);
+//		});
+
+//		$("#scroll-bar").click(function(e){
+//
+//		});
+        function repeatingfunction(e) {
+            console.log('e repeating:', e);
+            var x = e.pageX - this.offsetLeft;
+			var y = e.pageY - this.offsetTop;
+            console.log('relX:', x, 'relY:', y);
+			x -= document.body.scrollLeft;
+//            x = Math.round(x);
+			console.log('relX:', x, 'relY:', y);
+
+            var fraction = x / 500.0;
+            document.body.scrollLeft = Math.round(fraction * document.body.scrollWidth);
+        }
+
+        var intervalHolder;
+        $("#scroll-bar").mousedown(function(e) {
+//            intervalHolder = setInterval(function() {
+//                repeatingfunction(e);
+//            }, 50);
+//            intervalHolder = setInterval(repeatingfunction, 50, e);
+            intervalHolder = setInterval(repeatingfunction.bind(this, e), 200);
+//            (function(e) {
+//                console.log('e closure:', e);
+//                intervalHolder = setInterval(function() {
+//                    repeatingfunction(e);
+//                }, 50);
+//            }(e));
+        }).mouseup(function() {
+            clearInterval(intervalHolder);
+        });
+
+
+
+
+
 		//TODO PUT TD ALL INSIDE TABLE!!!!! OUTSIDE AT THE MOMENT
 //		videoName = 'Animals6mins';
 		imageDirectory = 'example_images/' + videoName + '/';
@@ -161,7 +209,6 @@
 		loadDataset(videoName);
 
 		$("body").mousewheel(function(event, delta) {
-			//TODO fix when it hits the end
 			this.scrollLeft -= (delta * scrollRate);
 			event.preventDefault();
 		});

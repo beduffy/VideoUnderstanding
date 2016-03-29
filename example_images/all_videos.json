@@ -1,13 +1,9 @@
 {
-	"videos" : [
-	  {
-		'start pushing any processed or downloaded videos here.'
-	  },
-	  {
-
-	  },
-	  {
-
-	  }
-	]
+    "videos": [
+        {
+            "last_processed_datetime": "2016-03-29 18:08", 
+            "video_url": "https://www.youtube.com/watch?v=ezyrSKgcyJw", 
+            "video_name": "Walk_down_the_Times_Square_in_New_York"
+        }
+    ]
 }

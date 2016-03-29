@@ -12,10 +12,9 @@ import main
 
 app = Flask(__name__, static_url_path='')
 app.config['SECRET_KEY'] = 'secret!'
-
+# app.debug = True
 globals.init_globals(app)
 
-# app.debug = True
 
 # landing page
 @app.route("/")
@@ -47,11 +46,10 @@ def process_video():
     current_dir = os.path.dirname(os.path.realpath(__file__))
     video_path = os.path.join(current_dir, 'example_images', data['name'], data['name'] + '.mp4') #TODO VERY CAREFUL HERE MIGHT NOT BE MP4
 
-    thread.start_new_thread(main.process_video, (video_path, ))
+    thread.start_new_thread(main.process_video, (video_path, data['url']))
 
     # todo change
     return 'Video has completed processing'
-
 
 # get image
 @app.route('/example_images/<path:path>')
@@ -81,6 +79,24 @@ def get_json_struct(video_folder):
 
     return 'No json struct found!'
 
+# get all_videos json
+@app.route("/get_all_videos", methods=['GET'])
+def get_json_videos():
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    json_videos_path = os.path.join(current_dir, 'example_images', 'all_videos.json')
+
+    print 'json_struct_path: ', json_videos_path
+
+    json_videos = {'videos': []}
+    if os.path.isfile(json_videos_path):
+        with open(json_videos_path) as data_file:
+            json_videos = json.load(data_file)
+
+            print json_videos
+            return jsonify(**json_videos)
+
+    return jsonify(**json_videos)
+
 # ALL FLASH SOCKETS BELOW
 
 def ack():
@@ -97,8 +113,5 @@ def test_disconnect():
     print('Client disconnected')
 
 if __name__ == "__main__":
-    # app.run(host='0.0.0.0')
-    # app.run()
-
-    print 'running socketio on app'
-    globals.socketio.run(app)
+    print 'Running socketio on app'
+    globals.socketio.run(app, debug=True, log_output=False)

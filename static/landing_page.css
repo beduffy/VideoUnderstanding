@@ -56,15 +56,18 @@
             /*height: 100vh;*/
         /*}*/
 
-        /*.container-fluid {*/
-            /*!*height: auto;*!*/
+        .container-fluid {
+            /*height: auto;*/
             /*height: 100vh;*/
-        /*}*/
+            /*TODO height variable or change with js*/
+            height: 1000px;
+        }
 
         #all-videos {
             overflow:hidden;
             overflow-y:scroll;
-            height: auto;
+            /*TODO height variable or change with js*/
+            height: 1000px;
         }
 
         #console {

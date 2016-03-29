@@ -3,79 +3,58 @@ import shlex,subprocess
 from subprocess import Popen, PIPE
 from time import sleep
 import json
+from utilities.globals import log, HEADER_SIZE, cd
+from timeit import default_timer as timer
 
 def main_object_detect(json_struct, video_path):
+    log('Starting YOLO Object Detection', header=HEADER_SIZE)
+    start = timer()
+
     directory = os.path.dirname(video_path)
     image_directory_path = os.path.join(directory, 'images', 'full')
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
+    with cd('/home/ben/Documents/darknet'):
+        darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights"
+        split_command = darknet_command.split(' ')
 
+        if os.path.isfile(json_struct_path):
+            with open(json_struct_path) as data_file:
+                json_struct = json.load(data_file)
 
-    # enter the directory like this:
-    with cd('/home/ben/darknet'):
-       # we are in ~/Library
-       subprocess.call("ls")
+        num_images = len(json_struct['images'])
 
+        for idx, image in enumerate(json_struct['images']):
+            pipe = Popen(split_command,  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            path = os.path.join(image_directory_path, image['image_name']) + '\n'
+            # path = '/home/ben/VideoUnderstanding/example_images/Animals6mins/images/full/Animals6mins-551.png'
+            output, err = pipe.communicate(path)
 
-    #TODO
-    #TODO
-    #TODO WHAT I DID ABOVE NEEDS CONTEXT MANAGER COZ IT MIGHT STAY IN DIRECTORY?
+            object_label_probs = output.split('\n')
+            predict_message = object_label_probs[0]
+            time_for_prediction = predict_message.split(' ')[-2]
+            object_label_probs = object_label_probs[1:-1]
 
-    os.chdir()
-    # darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights /home/ben/VideoUnderstanding/example_images/Animals6mins/images/full/Animals6mins-551.png"
-    darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights"
-    split_command = darknet_command.split(' ')
+            for i, s in enumerate(object_label_probs):
+                split = s.split(':')
+                object_label_probs[i] = {'class': split[0], 'score': split[1][1:]}
 
-    with open('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/tasks.txt') as f:
-        # lines = f.readlines()
-        lines = [i[:-1] for i in f.readlines()]
+            log("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
+            if object_label_probs:
+                log('Objects detected: ', object_label_probs)
 
-    json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
-    if os.path.isfile(json_struct_path):
-        with open(json_struct_path) as data_file:
-            json_struct = json.load(data_file)
+            # if not image.get('object_lists'): #todo if testing yolo before rcnn
+            #     log('inside here')
+            image['object_lists'] = {}
+            image['object_lists']['yolo_20'] = object_label_probs
 
-    current_time = 0.0
-    num_images = len(json_struct['images'])
+        # print 'after json_struct:', json_struct
+        json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
-    print num_images
-    idx = 0
-
-    print 'before json_struct:', json_struct
-
-    for line, image in zip(lines, json_struct['images']):
-        pipe = Popen(split_command,  stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        path =  os.path.join(image_directory_path, line) + '\n'
-        path = image_directory_path + '/' + line
-        # path = '/home/ben/VideoUnderstanding/example_images/Animals6mins/images/full/Animals6mins-551.png'
-        output, err = pipe.communicate(path)
-
-        object_label_probs = output.split('\n')
-        predict_message = object_label_probs[0]
-        time_for_prediction = predict_message.split(' ')[-2]
-        current_time += float(time_for_prediction)  #TODO ERROR HERE!!! ValueError: could not convert string to float: Path:
-        object_label_probs = object_label_probs[1:-1]
-        # object_lists.append(object_label_probs)
-
-        # print predict_message
-        # print "prediction time: ", time_for_prediction
-        print "total time taken in s: {} scene {}/{}".format(current_time, idx, num_images)
-        # print ' % (idx. num_images)
-        # print object_label_probs
-
-        image['object_lists'] = object_label_probs
-        # TODO CHANGE ABOVE TO image['object_lists'] = [object_label_probs]
-        # print image['object_lists']
-        # print image
-
-        # print 'sleeping'
-        idx += 1
-        print
-        # sleep(0.04)
-
-    print 'after json_struct:', json_struct
-    json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
-
+        end = timer()
+        log('YOLO Object Detection complete', header=HEADER_SIZE)
+        # log('Average Time taken per image: {}'.format(average_time_per_image))
+        log('Time taken:', round((end - start), 5), 'seconds')
 
 # main_object_detect('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 

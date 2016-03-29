@@ -584,7 +584,7 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
 
     # TODO rename above to process video and put process_video inside here.
     directory = os.path.dirname(video_path)
-    name = video_path.split('/')[-1][:-4]
+    name = video_path.split('/')[-1][:-4] # todo watch out for .4 letters at end
 
     # log('')
     # log('Video Path:', video_path)

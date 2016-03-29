@@ -6,6 +6,17 @@ import json
 
 HEADER_SIZE = 3
 
+class cd:
+    """Context manager for changing the current working directory"""
+    def __init__(self, newPath):
+        self.newPath = os.path.expanduser(newPath)
+
+    def __enter__(self):
+        self.savedPath = os.getcwd()
+        os.chdir(self.newPath)
+
+    def __exit__(self, etype, value, traceback):
+        os.chdir(self.savedPath)
 
 def init_globals(app):
     global socketio
@@ -64,31 +75,29 @@ def video_into_all_frames(video_path, interval=10):
     cv2.destroyAllWindows()
 
 def log(*args, **kwargs):
-    # print 'inside log ---------------------------------------'
     # todo might not need below 3 lines can just pass args to join?
     str_list = []
 
     for i, arg in enumerate(args):
-        # print i, str(arg)
         str_list.append(str(arg))
 
     ret_str = ' '.join(str_list)
 
-    print 'string::::: ', ret_str
+    print ret_str
 
     data_to_send = {'s': ret_str}
 
     if not kwargs:
         data_to_send['color'] = 'white'
     else:
-        print 'kwargs', kwargs
+        # print 'kwargs', kwargs
         data_to_send['color'] = kwargs.get('color', 'white')
-        print 'data_to_send', data_to_send
+        # print 'data_to_send', data_to_send
         # if kwargs['header']:
         #     print 'data_to_send', data_to_send
         data_to_send['header'] = kwargs.get('header' , None)
 
-    print 'data_to_send', data_to_send
+    # print 'data_to_send', data_to_send
     socketio.emit('print_event', data_to_send)
 
 

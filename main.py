@@ -31,8 +31,11 @@ import webbrowser
 from pytube import api
 from pprint import pprint
 from utilities.globals import log
+import datetime, time
 
-def process_video(video_path):
+def process_video(video_path, video_url):
+    #todo pass all below in one dictionary to save calculating every time?
+    video_name = video_path.split('/')[-1][:-4]
     directory = os.path.dirname(video_path)
     image_directory_path = os.path.join(directory, 'images', 'full')
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
@@ -42,7 +45,7 @@ def process_video(video_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    filmstrip.main_separate_scenes(json_struct, video_path, False)
+    # filmstrip.main_separate_scenes(json_struct, video_path, False)
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
@@ -54,9 +57,26 @@ def process_video(video_path):
     # Open URL in a new tab, if a browser window is already open.
     log('Opening browser tab with results')
     url = 'http://localhost:5000/video_results.html?video='
+    # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
     webbrowser.open_new_tab(url + json_struct['info']['name'])
 
-    # TODO store video in processed videos of
+    # Save video in processed videos json.
+    all_videos_json = {'videos': []}
+    all_videos_json_path = '/home/ben/VideoUnderstanding/example_images/all_videos.json'
+    if os.path.isfile(all_videos_json_path):
+        with open(all_videos_json_path) as data_file:
+            all_videos_json = json.load(data_file)
+
+    for idx, video in enumerate(all_videos_json['videos']):
+        if video['video_name'] == video_name:
+            all_videos_json['videos'][idx]['last_processed_datetime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            break
+    else: # if no breaks
+        all_videos_json['videos'].append({'video_name': video_name,
+                                          'video_url': video_url,
+                                          'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
+
+    json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
 
 def download_video(url,changed_name=None):
     yt = api.YouTube(url)
@@ -150,7 +170,10 @@ def download_video(url,changed_name=None):
 
     return yt.filename
 
-
+# webbrowser.get('chromium')
+# webbrowser.open('file:///' + '/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/metadata/result_struct.json')
+# open('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/metadata/result_struct.json')
+# todo fix anotehr time?
 
 # TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 # TODO show full json file in browser
