@@ -338,8 +338,6 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
 
     hist_features = {}
 
-    INITIAL_NUM_FRAMES_IN_SCENE = 5
-
     # todo below into function ASAP
     # FUNCTION CALLED create frames
     left_scene_first_frame = 0
@@ -355,7 +353,7 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
 
 
 
-        num_frames_in_scene = INITIAL_NUM_FRAMES_IN_SCENE
+        num_frames_in_scene = json_struct['info']['INITIAL_NUM_FRAMES_IN_SCENE']
         range = right_scene_first_frame - left_scene_first_frame
         jump_rate = range / num_frames_in_scene
 
@@ -593,18 +591,19 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
 
     json_struct['info'] = getInfo(video_path)
     json_struct['info']['name'] = name
+    json_struct['info']['INITIAL_NUM_FRAMES_IN_SCENE'] = 5
 
     makeOutputDirs(directory)
 
     # calculateFrameStats could still be useful
     # data = calculateFrameStats(video_path, verbose, 0) # TODO AFTER FRAME USED TO BE HERE INSTEAD OF 0. WORK OUT WHAT IT IS.
-    # data = detectScenes(video_path, directory, data, name, json_struct, verbose)
 
     process_video(video_path, directory, name, json_struct, verbose)
 
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
     json.dump(json_struct, open(json_path, 'w'), indent=4)
 
+    #todo log info one at a time!!!!!!!!
     log("Video Info: ", json_struct['info'], color='green', header=HEADER_SIZE)
     log("Video scene and frame extraction complete.", color='green', header=HEADER_SIZE)
     end = timer()

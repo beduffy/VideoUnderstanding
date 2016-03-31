@@ -64,18 +64,17 @@ def send_image(path):
 # get result_struct.json
 @app.route("/get_json/<path:video_folder>", methods=['GET'])
 def get_json_struct(video_folder):
-    print 'video folder: ', video_folder
     current_dir = os.path.dirname(os.path.realpath(__file__))
     json_struct_path = os.path.join(current_dir, 'example_images', video_folder, 'metadata', 'result_struct.json')
 
-    print 'json_struct_path: ', json_struct_path
+    # print 'json_struct_path: ', json_struct_path
 
     json_struct = {'images': []}
     if os.path.isfile(json_struct_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-            print json_struct
+            # print json_struct
             return jsonify(**json_struct)
 
     return 'No json struct found!'
@@ -86,14 +85,14 @@ def get_json_videos():
     current_dir = os.path.dirname(os.path.realpath(__file__))
     json_videos_path = os.path.join(current_dir, 'example_images', 'all_videos.json')
 
-    print 'json_struct_path: ', json_videos_path
+    # print 'json_struct_path: ', json_videos_path
 
     json_videos = {'videos': []}
     if os.path.isfile(json_videos_path):
         with open(json_videos_path) as data_file:
             json_videos = json.load(data_file)
 
-            print json_videos
+            # print json_videos
             return jsonify(**json_videos)
 
     return jsonify(**json_videos)

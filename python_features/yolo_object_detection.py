@@ -6,6 +6,13 @@ import json
 from utilities.globals import log, HEADER_SIZE, cd
 from timeit import default_timer as timer
 
+# Pascal VOC 2012 dataset. It can detect the 20 Pascal object classes:
+
+# person
+# bird, cat, cow, dog, horse, sheep
+# aeroplane, bicycle, boat, bus, car, motorbike, train
+# bottle, chair, dining table, potted plant, sofa, tv/monitor
+
 def main_object_detect(json_struct, video_path):
     log('Starting YOLO Object Detection', header=HEADER_SIZE)
     start = timer()
@@ -15,7 +22,7 @@ def main_object_detect(json_struct, video_path):
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
     with cd('/home/ben/Documents/darknet'):
-        darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights"
+        darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights" ##TODO more weights for better accuracy. And bigger cfg.
         split_command = darknet_command.split(' ')
 
         if os.path.isfile(json_struct_path):
@@ -43,12 +50,14 @@ def main_object_detect(json_struct, video_path):
             if object_label_probs:
                 log('Objects detected: ', object_label_probs)
 
+            # TODO open predictions.png save in section other than full images!!!!
+            # TODO open predictions.png save in section other than full images!!!!
+
             # if not image.get('object_lists'): #todo if testing yolo before rcnn
             #     log('inside here')
             image['object_lists'] = {}
             image['object_lists']['yolo_20'] = object_label_probs
 
-        # print 'after json_struct:', json_struct
         json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
         end = timer()

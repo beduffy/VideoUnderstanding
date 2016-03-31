@@ -55,7 +55,7 @@ def process_video(video_path, video_url):
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
-    scene_results.average_all_scene_results(json_struct)
+    scene_results.average_all_scene_results(json_struct, json_struct_path)
 
     # ---------------------------------
 
@@ -148,7 +148,7 @@ def download_video(url,changed_name=None):
 
 # download_video('https://www.youtube.com/watch?v=0Y4r9YcLXDM')
 
-process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)
+# process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)
 # process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
 # video_into_all_frames('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
