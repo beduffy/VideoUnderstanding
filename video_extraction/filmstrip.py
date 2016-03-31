@@ -591,10 +591,6 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     # log('Directory Path:', directory)
     log('Processing video:', name, header=HEADER_SIZE)
 
-
-
-    # log('')
-
     json_struct['info'] = getInfo(video_path)
     json_struct['info']['name'] = name
 
@@ -609,7 +605,7 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
     json.dump(json_struct, open(json_path, 'w'), indent=4)
 
-    log("Video Info: ", json_struct['info'])
-    log("Video scene and frame extraction complete.")
+    log("Video Info: ", json_struct['info'], color='green', header=HEADER_SIZE)
+    log("Video scene and frame extraction complete.", color='green', header=HEADER_SIZE)
     end = timer()
     log('Time taken:', round((end - start), 5), 'seconds.')

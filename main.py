@@ -23,12 +23,13 @@
 from video_extraction import filmstrip
 from python_features import scene_classification
 from python_features import yolo_object_detection
+from video_extraction import scene_results
 import json
 import os
 from timeit import default_timer as timer
 import webbrowser
 # from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
-from pytube import api
+from pytube import api, exceptions
 from pprint import pprint
 from utilities.globals import log
 import datetime, time
@@ -47,47 +48,43 @@ def process_video(video_path, video_url):
 
     # main processing sub functions ------------------
 
-    filmstrip.main_separate_scenes(json_struct, video_path, False)
+    # filmstrip.main_separate_scenes(json_struct, video_path, False)
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
 
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
-    # Average all results for scene()
+    scene_results.average_all_scene_results(json_struct)
 
     # ---------------------------------
 
-    # Open URL in a new tab, if a browser window is already open.
-    log('Opening browser tab with results')
-    url = 'http://localhost:5000/video_results.html?video='
-    # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
-    webbrowser.open_new_tab(url + json_struct['info']['name'])
-
-    # Save video in processed videos json.
-    all_videos_json = {'videos': []}
-    all_videos_json_path = '/home/ben/VideoUnderstanding/example_images/all_videos.json'
-    if os.path.isfile(all_videos_json_path):
-        with open(all_videos_json_path) as data_file:
-            all_videos_json = json.load(data_file)
-
-    for idx, video in enumerate(all_videos_json['videos']):
-        if video['video_name'] == video_name:
-            all_videos_json['videos'][idx]['last_processed_datetime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-            break
-    else: # if no breaks
-        all_videos_json['videos'].append({'video_name': video_name,
-                                          'video_url': video_url,
-                                          'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
-
-    json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
+    # # Open URL in a new tab, if a browser window is already open.
+    # log('Opening browser tab with results')
+    # url = 'http://localhost:5000/video_results.html?video='
+    # # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
+    # webbrowser.open_new_tab(url + json_struct['info']['name'])
+    #
+    # # Save video in processed videos json.
+    # all_videos_json = {'videos': []}
+    # all_videos_json_path = '/home/ben/VideoUnderstanding/example_images/all_videos.json'
+    # if os.path.isfile(all_videos_json_path):
+    #     with open(all_videos_json_path) as data_file:
+    #         all_videos_json = json.load(data_file)
+    #
+    # for idx, video in enumerate(all_videos_json['videos']):
+    #     if video['video_name'] == video_name:
+    #         all_videos_json['videos'][idx]['last_processed_datetime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    #         break
+    # else: # if no breaks
+    #     all_videos_json['videos'].append({'video_name': video_name,
+    #                                       'video_url': video_url,
+    #                                       'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
+    #
+    # json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
 
 def download_video(url,changed_name=None):
     yt = api.YouTube(url)
-
-    # Once set, you can see all the codec and quality options YouTube has made
-    # available for the perticular video by printing videos.
-
     pprint(yt.get_videos())
 
     # [<Video: MPEG-4 Visual (.3gp) - 144p>,
@@ -100,9 +97,6 @@ def download_video(url,changed_name=None):
     #  <Video: VP8 (.webm) - 360p>,
     #  <Video: VP8 (.webm) - 480p>]
 
-    # The filename is automatically generated based on the video title.  You
-    # can override this by manually setting the filename.
-
     # set the filename:
     if changed_name:
         yt.set_filename(changed_name)
@@ -111,88 +105,31 @@ def download_video(url,changed_name=None):
 
     log('Video Name: ', yt.filename)
 
-    # You can also filter the criteria by filetype.
-    pprint(yt.filter('flv'))
-
-    # [<Video: Sorenson H.263 (.flv) - 240p>,
-    #  <Video: H.264 (.flv) - 360p>,
-    #  <Video: H.264 (.flv) - 480p>]
-
     # Notice that the list is ordered by lowest resolution to highest. If you
     # wanted the highest resolution available for a specific file type, you
     # can simply do:
-    log(yt.filter('mp4')[-1])
-    # <Video: H.264 (.mp4) - 720p>
+    log('Highest mp4 resolution video: ', yt.filter('mp4')[-1])
 
-    # You can also get all videos for a given resolution
-    pprint(yt.filter(resolution='480p'))
+    if not yt.filter(extension='mp4'):
+        log('No mp4 vidoes found!', color='red')
+        return 'No Video Found'
 
-    # [<Video: H.264 (.flv) - 480p>,
-    #  <Video: VP8 (.webm) - 480p>]
+    video = yt.filter('mp4')[-1]
 
-    # To select a video by a specific resolution and filetype you can use the get
-    # method.
-
-    # video = yt.get('mp4', '720p')
-
-    # NOTE: get() can only be used if and only if one object matches your criteria.
-    # for example:
-
-    # pprint(yt.get_videos())
-
-    #[<Video: MPEG-4 Visual (.3gp) - 144p>,
-    # <Video: MPEG-4 Visual (.3gp) - 240p>,
-    # <Video: Sorenson H.263 (.flv) - 240p>,
-    # <Video: H.264 (.flv) - 360p>,
-    # <Video: H.264 (.flv) - 480p>,
-    # <Video: H.264 (.mp4) - 360p>,
-    # <Video: H.264 (.mp4) - 720p>,
-    # <Video: VP8 (.webm) - 360p>,
-    # <Video: VP8 (.webm) - 480p>]
-
-    # Since we have two H.264 (.mp4) available to us... now if we try to call get()
-    # on mp4...
-
-    # video = yt.get('mp4', '720p')
-    print 'get videos: ', yt.get_videos()
-    print
-
-    all_videos = {}
-    highest_res_idx = -1
-    highest_res = -500
-    for idx, vid_string in enumerate(yt.get_videos()):
-        print vid_string
-        split_string = vid_string.split('-')
-        resolution = int(split_string[1].strip()[:-1])
-
-        all_videos['bla']
-        print resolution
-        if resolution > highest_res:
-            highest_res = resolution
-            highest_res_idx = idx
-    # video = yt.get_videos()
-    # MultipleObjectsReturned: 2 videos met criteria.
-
-    # In this case, we'll need to specify both the codec (mp4) and resolution
-    # (either 360p or 720p).
-
-    log('Downloading!')
-
-    # If you wanted to choose the output directory, simply pass it as an
-    # argument to the download method.
     current_dir = os.path.dirname(os.path.realpath(__file__))
     video_folder_path = os.path.join(current_dir, 'example_images', yt.filename)
     if not os.path.isdir(video_folder_path):
         os.makedirs(video_folder_path)
         try:
+            log('Downloading!', color='green')
             video.download(video_folder_path)
-            log('Finished downloading!')
+            log('Finished downloading!', color='green')
         except:
-            #TODO TODO TODO TEST TEST TEST TEST BELOW CAREFUL
+            #TODO TODO TODO TEST TEST TEST TEST BELOW CAREFUL in case recursive
             os.rmdir(video_folder_path)
 
     else:
-        log('Folder and file already there.')
+        log('Folder and file already there:', video_folder_path, color='red')
 
     return yt.filename
 
@@ -209,7 +146,9 @@ def download_video(url,changed_name=None):
 # tODO FIND best frame in scene most representative for gif
 #todo store port number?
 
-# process_video('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+# download_video('https://www.youtube.com/watch?v=0Y4r9YcLXDM')
+
+process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)
 # process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 # create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
 # video_into_all_frames('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')

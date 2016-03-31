@@ -18,12 +18,17 @@
 
     <script>
         var printToConsole = function(data) {
+            if (typeof data === undefined) {
+                console.log('STATEMENT IS UNDEFINED TO PRINT');
+                return;
+            }
+
             if (!data.color) {
                 data.color = 'white';
             }
 
             // HTML escape angled bracket
-            data.s = data.s.replace('<', '&lt;');
+            if (data.s !== undefined) data.s = data.s.replace('<', '&lt;');
 
             if (data.header) {
                 var htmlString = "<div style='color:{0};'><h{2}>{1}</h{2}></br></div>".format(data.color, data.s, data.header);
@@ -52,7 +57,7 @@
             var $this = $(this);
             console.log("Download Video", $this);
 
-            $this.off();
+//            $this.off(); //todo add back?
             // Future thingy todo set back or not?
             var $videoHolder = $this.parent();
 
@@ -66,13 +71,11 @@
             var videoName;
             var dataToSend = {'url': watchUrl};
             console.log('data to send:', dataToSend);
+//            console.log('')
             $.post("/download_video/", dataToSend, function (data, status) {
-//                console.log('Video Downloaded.');
-//                console.log(data);
-//                console.log(status);
-                printToConsole(status);
-                printToConsole(data);
-                printToConsole(console.log('Video Downloaded.'));
+                console.log('DATA FROM AJAX: ', data);
+                printToConsole({s: 'Video Downloaded.', color: 'green'});
+                printToConsole({s: data});
                 videoName = data; // todo for now
 
                 // Remove download video button
@@ -110,7 +113,7 @@
             });
         }
 
-        var embedVideo = function(url, embedPlace, download, title) {
+        var embedVideo = function(url, embedPlace, download, title, datetime) {
             // forget checking if exists. Just copy right.
             var splitUrl = url.split('/');
             var videoID = splitUrl[splitUrl.length - 1];
@@ -142,6 +145,9 @@
                 // if title exists add title to video holder and add process again button
                 var titleString = '<h3 class="video_title">' + title + '</h3>';
                 $videoHolder.append(titleString);
+
+                var lastDatetimeString = '<h4 >Last processed: ' + datetime + '</h4>';
+                $videoHolder.append(lastDatetimeString);
 
                 var processVideoButtonString = "<button class='video_button process' type=\"button\">Process Again</button>";
                 var $processButton = $(processVideoButtonString);
@@ -207,25 +213,21 @@
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
         socket.on('connect', function() {
-            console.log('Connected to server');
 //            socket.emit('my event', {data: 'I\'m connected!'});
         });
 
         socket.on('disconnect', function() {
-            console.log('Disconnected from server');
 //            socket.emit('my event', {data: 'I\'m DISconnected!'});
         });
 
         socket.on('print_event', function(data) {
-            //TODO all below into function?
             console.log('data:', data); //debug
-
             printToConsole(data);
         });
 
         $('#post-form').click(function() {
             var url_from_form = $('#url-form').val();
-            console.log('Sending url func. Url is:', url_from_form);
+//            console.log('Sending url func. Url is:', url_from_form);
             embedVideo(url_from_form, $('#new-videos'), true)
         });
 
@@ -235,11 +237,11 @@
                 console.log('Failure getting json');
                 return;
             }
-            console.log('all_videos:', data);
+//            console.log('all_videos:', data);
 
             var $processedVideos = $('#processed-videos');
             for (var i = 0; i < data.videos.length; i++) {
-                embedVideo(data.videos[i].video_url, $processedVideos, false, data.videos[i].video_name);
+                embedVideo(data.videos[i].video_url, $processedVideos, false, data.videos[i].video_name, data.videos[i].last_processed_datetime);
             }
         });
 

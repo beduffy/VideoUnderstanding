@@ -20,7 +20,7 @@ class cd:
 
 def init_globals(app):
     global socketio
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, async_mode="gevent")
 
 def create_tasks_file_from_json(json_struct_path):
     directory = os.path.dirname(json_struct_path)
