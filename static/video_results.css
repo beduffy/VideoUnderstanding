@@ -19,13 +19,21 @@ tr {
 	vertical-align: top;
 }
 
-/*
-	STRUCTURE
-*/
 .frame {
-	/*width: 1500px;*/
 	height:400px;
 	width:500px;
+	word-wrap: break-word;
+}
+
+.scene-change-divider-td {
+    background-color: red;
+    height:400px;
+	width:200px;
+}
+
+.scene-change-info-td {
+    height:400px;
+	width:600px;
 	word-wrap: break-word;
 }
 
@@ -86,4 +94,6 @@ a:hover { color: #ccc; }
     position: fixed;
     margin-top: -100px;
     margin-left: -250px;
+    border-radius: 40px;
+    opacity: 0.5;
 }
