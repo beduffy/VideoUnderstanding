@@ -3,60 +3,25 @@
 
 <head>
 	<meta charset="UTF-8">
-
-	<!--TODO change -->
-	<title>Video Understanding</title>
-
+	<title>Video Results Page</title>
 	<link rel="stylesheet" type="text/css" href="video_results.css">
-
 </head>
 
 <script src="handlebars-v4.0.5.js"></script>
 
 <body>
-<!--TODO make header bigger and descripts smaller and have different classes for all. -->
 	<svg id="scroll-bar">
         <!--width be representative of what we see on screen todo-->
-        <rect id="cur-pos" x="0" y="0" width="20" height="70" style="fill:rgb(0,255,0);">
-
+        <!--TODO popup number below scroll bar to show what scene we are on-->
+        <!--todo DONT HIDE CURPOS AT VERY LEFT AND RIGHT -->
+        <rect id="cur-pos" x="0" y="0" width="20" height="40" style="fill:rgb(0,255,0);">
         </rect>
     </svg>
 
-	<div id="header">
-		<h1 id="video-title"></h1>
-		<script id="header-template" type="text/x-handlebars-template">
-            <div class="description">
-			    <div>Number of frames: {{info.framecount}}</div>
-                <div>Number of images:  {{info.num_images}}</div>
-				<div>Number of scenes:  {{info.num_scenes}}</div>
-				<div>FPS: {{info.fps}}</div>
-				<div>Length: {{divide info.length 60.0}} minutes</div>
-            </div>
-		</script>
-	</div>
-
-
 	<div id="page-wrap">
-		<!--{{#if checkSceneChange scene_num}}-->
-								<!--<div>GAEFRGEAGREAGARGEA</div>-->
-							<!--{{/if}}-->
-
-		<!--{{#if @last.scene_num '==' "212" }}-->
-								<!--Last :(-->
-							  <!--{{/if}}-->
-		<!--{{#if @index "==" 0}}-->
-
-							<!--{{/if}}-->
-
-		<!--{{isEqual}}-->
-								<!--<div>HEY HEYOOOO2131232131232131231</div>-->
-							<!--{{/if}}-->
-
-<!--{{#dominant_colours.avg_colour}}-->
-<!--{{/each}}-->
 		<script id="image-template" type="text/x-handlebars-template">
 
-            <table>
+            <table id="main-table">
 			{{#each images}}
 				<td>
 					<div class="frame">
@@ -75,24 +40,19 @@
 							<div>Average colour:</div>
 							<svg style="width:{{getFrameWidth}};">
 								<g transform="translate(0,0)">
-
-										<rect x="0" width="{{getFrameWidth}}" height="40" style="fill:rgb({{getColourString dominant_colours.avg_colour.col.[0] dominant_colours.avg_colour.col.[1] dominant_colours.avg_colour.col.[2]}})">
-										</rect>
-
+                                    <rect x="0" width="{{getFrameWidth}}" height="40" style="fill:rgb({{getColourString dominant_colours.avg_colour.col.[0] dominant_colours.avg_colour.col.[1] dominant_colours.avg_colour.col.[2]}})">
+                                    </rect>
 								</g>
 							</svg>
 							<div>L2 Distance between avg colour: {{dominant_colours.l2distnext}}</div>
 							<div>chi-dist: {{dominant_colours.chi_dist_next}}</div>
 
                             <div>Frame Number: {{frame_number}}</div>
-							<div>Time: {{divide frame_number}}s</div>
-							<!--TODO ADD time out of full length of video.-->
-							<!-- TODO add all images together to form timeline to see whole video in one go.!!!!!!!! video summarisation best idea ever-->
+							<div>Time: {{frameNoToTime frame_number}}</div>
 							<div>Scene number: <span class="scene_number_span">{{scene_num}}</span></div>
 							<br>
 
-                            <div class='scene_desc'>
-								<!-- TODO if scene results exist.-->
+                            <div class='scene_desc'>>
 								<h2>Scene Results 1</h2>
                                 {{#each scene_results.scene_results1}}
                                     <div>{{label}} : {{probability}}</div>
@@ -145,7 +105,6 @@
             {{#each object_classes.yolo_20.class_occurrences}}
                 <div>{{0}}: <span style="color: firebrick;">{{1}}</span></div>
             {{/each}}
-<!--TODO AVERAGE COLOUR RECT-->
             <h2>Average Colour</h2>
             <svg style="width:{{getFrameWidth}};">
                 <g transform="translate(0,0)">
@@ -159,6 +118,27 @@
     </td>;
 </script>
 
+<script id="video-info-template" type="text/x-handlebars-template">
+    <td>
+        <h1 id="video-title">{{info.name}}</h1>
+        <div class="description">
+            <div>Number of frames: {{info.framecount}}</div>
+            <div>Number of images:  {{info.num_images}}</div>
+            <div>Number of scenes:  {{info.num_scenes}}</div>
+            <div>FPS: {{toFixed info.fps 2}}</div>
+            <div>Length: {{secondsToMinutes info.length}} minutes</div>
+            <div>Length: {{toFixed info.length 0}}</div>
+            <div>Resolution: {{info.width}}x{{info.height}}</div>
+            <div>Show average results of all scenes below.</div>
+            <h2>Gif</h2>
+            <div class="frame">
+                <img id="gif" class="img_frame" src="">
+                <div>Scene Number: <span id="gif-scene-num" style="color: indigo;">0</span></div>
+            </div>
+        </div>
+    </td>
+</script>
+
 <!--todo replace below with downloaded jquery and above-->
 <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
 <!--<script src="https://code.jquery.com/jquery-2.2.2.min.js"   integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="   crossorigin="anonymous"></script>-->
@@ -166,297 +146,7 @@
 <script src="jquery-1.12.0.min.js"></script>
 <script src="jquery-ui-1.11.4.min.js"></script>
 <script src="jquery.mousewheel.js"></script>
-<script>
-	// Global Variables
-	var scrollRate = 1000;
-	var imageDirectory;
-	var globalData;
-
-	var frameWidth = 500.0;
-	var numDominantColours;
-
-    var $slider = $('#cur-pos');
-    var $scrollBar = $('#scroll-bar');
-
-	var QueryString = function () {
-	  // This function is anonymous, is executed immediately and
-	  // the return value is assigned to QueryString!
-	  var query_string = {};
-	  var query = window.location.search.substring(1);
-	  var vars = query.split("&");
-	  for (var i=0;i<vars.length;i++) {
-		var pair = vars[i].split("=");
-			// If first entry with this name
-		if (typeof query_string[pair[0]] === "undefined") {
-		  query_string[pair[0]] = decodeURIComponent(pair[1]);
-			// If second entry with this name
-		} else if (typeof query_string[pair[0]] === "string") {
-		  var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
-		  query_string[pair[0]] = arr;
-			// If third or later entry with this name
-		} else {
-		  query_string[pair[0]].push(decodeURIComponent(pair[1]));
-		}
-	  }
-		return query_string;
-	}();
-
-    function SVG(tag) {
-       return document.createElementNS('http://www.w3.org/2000/svg', tag);
-    }
-
-	$(function() {
-		var videoName = QueryString.video;
-		console.log('Video Name: ', videoName);
-		$('#video-title').text(videoName);
-
-        //TODO add buttons to fly through frames and stop at certain scene points. easy enough with scroll?
-
-
-
-        $scrollBar.click(function(e) {
-            //todo make sure click below isnt called?
-
-		    var x = e.pageX - this.offsetLeft;
-			var y = e.pageY - this.offsetTop;
-            x -= document.body.scrollLeft;
-//            console.log('relX:', x, 'relY:', y);
-
-            $slider.attr('x', x);
-
-            var fraction = x / 500.0;
-            document.body.scrollLeft = Math.round(fraction * document.body.scrollWidth);
-		});
-
-        $slider.draggable().bind('click', function() {
-            console.log('click is called!');
-            $scrollBar.css('opacity', "1.0");
-        }).bind('mousedown', function(event, ui) {
-            // bring target to front
-            $(event.target.parentElement).append( event.target );
-          })
-          .bind('drag', function(event, ui){
-            // update coordinates manually, since top/left style props don't work on SVG
-              event.target.setAttribute('x', ui.position.left);
-//              event.target.setAttribute('y', ui.position.top);
-
-              var fraction = $slider.attr('x') / 500.0;
-              document.body.scrollLeft = fraction * document.body.scrollWidth;
-          }).bind('mouseup', function(event, ui) {
-            $scrollBar.css('opacity', 0.5);
-        });
-
-        $(document).scroll(function(e) {
-            var fraction = this.body.scrollLeft / this.body.scrollWidth;
-            var distx = fraction * 500.0;
-
-            distx = Math.round(distx).toString();
-            $slider.attr('x', distx);
-        });
-
-        $("body").mousewheel(function(event, delta) {
-			this.scrollLeft -= (delta * scrollRate);
-
-			event.preventDefault();
-		});
-
-		imageDirectory = 'example_images/' + videoName + '/';
-		loadDataset(videoName);
-	});
-
-	// Data Loading
-    function loadDataset(video_name) {
-		var url = "/get_json/" + video_name;
-		$.get(url, function(data) {
-			if (!data) {
-				console.log('Failure getting json');
-				return;
-			}
-			console.log(data);
-            console.log("Number of Images:", data.images.length);
-			globalData = data;
-			var $pageWrap = $("#page-wrap");
-			imageDirectory = imageDirectory + 'images/full/';
-			numDominantColours = data.images[0].dominant_colours.kmeans.length;
-
-            if (data.scenes) {
-                var rgbString = 'rgb(' + Math.round(data.scenes[0].average_colour[0]) + ', ' + Math.round(data.scenes[0].average_colour[1]) + ', ' + Math.round(data.scenes[0].average_colour[2]) + ')';
-                $('#video-title').css('color', rgbString);
-            }
-
-			Handlebars.registerHelper('divide', function (num1, num2) {
-				// CONVERT TO TIME TODO
-				return (num1 / num2).toFixed(3);
-			});
-
-			var headerScript = $("#header-template").html();
-			var headerTemplate = Handlebars.compile(headerScript);
-			var compiledHtml = headerTemplate(data);
-			$("#header").append(compiledHtml);
-
-			var last_scene_num;
-			var i = 0;
-
-			Handlebars.registerHelper('addDirectory', function(image_name) {
-				return imageDirectory + image_name;
-			});
-
-			Handlebars.registerHelper('divide', function(frame_number) {
-				return (frame_number / data.info.fps).toFixed(2);
-			});
-
-			Handlebars.registerHelper('checkSceneChange', function(scene_num, options) {
-//				var returnValue = false;
-//
-//				if (i === 0) {
-//					last_scene_num = parseInt($pageWrap.find('td:last-child').find('span.scene_number_span').html());
-//					i++;
-//					returnValue = true;
-//					if (returnValue) {
-//						return options.fn(this);
-//					}
-//					else {
-//						return options.inverse(this);
-//					}
-//				}
-//
-//				if (parseInt(scene_num) != last_scene_num) {
-//					last_scene_num = parseInt($pageWrap.find('td:last-child').find('span.scene_number_span').html());
-//				}
-//
-//				returnValue = true;
-//				if (returnValue) {
-//					return options.fn(this);
-//				}
-//				else {
-//					return options.inverse(this);
-//				}
-
-				var selected = false;
-				  // lots of logic that determines if item is selected
-
-				  if (selected) {
-					  return options.fn(this);
-				  }
-			});
-
-			Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
-
-				switch (operator) {
-					case '==':
-						return (v1 == v2) ? options.fn(this) : options.inverse(this);
-					case '===':
-						return (v1 === v2) ? options.fn(this) : options.inverse(this);
-					case '<':
-						return (v1 < v2) ? options.fn(this) : options.inverse(this);
-					case '<=':
-						return (v1 <= v2) ? options.fn(this) : options.inverse(this);
-					case '>':
-						return (v1 > v2) ? options.fn(this) : options.inverse(this);
-					case '>=':
-						return (v1 >= v2) ? options.fn(this) : options.inverse(this);
-					case '&&':
-						return (v1 && v2) ? options.fn(this) : options.inverse(this);
-					case '||':
-						return (v1 || v2) ? options.fn(this) : options.inverse(this);
-					default:
-						return options.inverse(this);
-				}
-			});
-
-            Handlebars.registerHelper('subtract', function (a, b) {
-                return a - b;
-			});
-
-			Handlebars.registerHelper( 'isEqual', function (options) {
-				var equal = false;
-				// lots of logic that determines if item is selected
-
-				if (index > 0 && data.images[index].scene_num === data.images[index-1].scene_num === true) {
-					equal = true;
-					console.log("@its true")
-				}
-
-				console.log(index, options);
-				if (equal) {
-//					return options.fn(this);
-					return options.fn(this);
-				}
-//				else {
-//					return options.inverse(this);
-//				}
-//				return (data.images[index].scene_num === data.images[index-1].scene_num) ? true : false;
-			});
-
-			Handlebars.registerHelper('getColourString', function (a, b, c) {
-				return Math.round(a) + ", " +  Math.round(b) + ", " + Math.round(c);
-			});
-
-			widthTravelled = 0;
-
-			Handlebars.registerHelper('getStartRect', function (count, index) {
-				var width = (count / 10000.0) * frameWidth;
-
-				var returnValue = widthTravelled;
-				widthTravelled += width;
-
-				if (index == (numDominantColours - 1)) {
-					widthTravelled = 0;
-				}
-				return Math.round(returnValue);
-			});
-
-			Handlebars.registerHelper('getRectWidth', function (count) {
-				var width = (count / 10000.0) * frameWidth;
-
-				return Math.round(width);
-			});
-
-			Handlebars.registerHelper('getFrameWidth', function () {
-				return frameWidth;
-			});
-
-			var theTemplateScript = $("#image-template").html();
-			var theTemplate = Handlebars.compile(theTemplateScript);
-			var theCompiledHtml = theTemplate(data);
-			$pageWrap.append(theCompiledHtml);
-
-            // todo bright flashy colours to indicate scene change
-			var lastSceneNumber = 0;
-			$pageWrap.find('td').each(function(index) {
-				var $this = $(this);
-				var this_scene_number = parseInt($this.find('.scene_number_span').text());
-				if (lastSceneNumber !== this_scene_number || index === 0) {
-                    var theTemplateScript = $("#scene-change-template").html();
-                    var theTemplate = Handlebars.compile(theTemplateScript);
-                    var theCompiledHtmljQ = $(theTemplate(data.scenes[this_scene_number])); //this or last
-
-
-                    theCompiledHtmljQ.insertBefore($this);
-
-					$this.find('.description').append("");
-                    lastSceneNumber = this_scene_number;
-				}
-			});
-
-            $('.scene-change-divider-td').each(function(index) {
-                var x = Math.round(($(this).offset().left / document.body.scrollWidth) * 500.0);
-
-                var bar = $(document.createElementNS("http://www.w3.org/2000/svg", "rect")).attr({
-                    x: x,
-                    y: 0,
-                    width: 3,
-                    height: 70,
-                    fill: "red"
-                });
-
-                $scrollBar.append(bar);
-            });
-        })
-    }
-
-</script>
-
+<script src="video_results.js"></script>
 </body>
 
 </html>
