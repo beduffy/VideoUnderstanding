@@ -10,13 +10,11 @@ from scipy.spatial import distance
 def video_step_through(video_path):
     cap = cv2.VideoCapture(video_path)
 
-    # ret, frame = cap.read()
-    # if frame == None:
-    #     return
+    frame_count = cap.get(cv.CV_CAP_PROP_FRAME_COUNT),
 
     cv2.namedWindow("Frame")
     frame_number = 0
-    changeImage(cap, frame_number)
+    changeImage(cap, frame_number, frame_count)
 
     faster_rate = 100
 
@@ -28,33 +26,36 @@ def video_step_through(video_path):
         if  k == ord('p'):
         # if  k == ord('2555904'):
             frame_number += 1
-            changeImage(cap, frame_number)
+            changeImage(cap, frame_number, frame_count)
         if k == ord('o'):
         # if k == 2424832:
             frame_number -= 1
-            changeImage(cap, frame_number)
+            changeImage(cap, frame_number, frame_count)
 
         if  k == ord('m'):
         # if  k == ord('2555904'):
             frame_number += faster_rate
-            changeImage(cap, frame_number)
+            changeImage(cap, frame_number, frame_count)
         if k == ord('n'):
         # if k == 2424832:
             frame_number -= faster_rate
-            changeImage(cap, frame_number)
+            changeImage(cap, frame_number, frame_count)
 
         if k == ord('i'):
             requested_frame = int(raw_input())
             if requested_frame >= 0 and requested_frame <= cap.get(cv.CV_CAP_PROP_FRAME_COUNT): # And less than or equal to last frame
                 frame_number = requested_frame
-                changeImage(cap, frame_number)
+                changeImage(cap, frame_number, frame_count)
         if k == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
-def changeImage(cap, frame_number):
+def changeImage(cap, frame_number, frame_count):
+    if frame_number > frame_count:
+        print 'frame_no:', frame_number, ' > ', frame_count
+        return
     cap.set(cv.CV_CAP_PROP_POS_FRAMES, frame_number)
     ret, frame = cap.read()
 
@@ -103,7 +104,7 @@ def optical_flow(video_path):
 
 # optical_flow('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
-# video_step_through('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
-
+# video_step_through('/home/ben/VideoUnderstanding/example_images/Funny_Videos_Of_Funny_Animals_NEW_2015/Funny_Videos_Of_Funny_Animals_NEW_2015.mp4')
+video_step_through('/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People.mp4')
 # video_step_through('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 

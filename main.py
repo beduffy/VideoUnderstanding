@@ -48,7 +48,7 @@ def process_video(video_path, video_url):
 
     # main processing sub functions ------------------
 
-    # filmstrip.main_separate_scenes(json_struct, video_path, False)
+    filmstrip.main_separate_scenes(json_struct, video_path, False)
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
@@ -59,29 +59,29 @@ def process_video(video_path, video_url):
 
     # ---------------------------------
 
-    # # Open URL in a new tab, if a browser window is already open.
-    # log('Opening browser tab with results')
-    # url = 'http://localhost:5000/video_results.html?video='
-    # # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
-    # webbrowser.open_new_tab(url + json_struct['info']['name'])
-    #
-    # # Save video in processed videos json.
-    # all_videos_json = {'videos': []}
-    # all_videos_json_path = '/home/ben/VideoUnderstanding/example_images/all_videos.json'
-    # if os.path.isfile(all_videos_json_path):
-    #     with open(all_videos_json_path) as data_file:
-    #         all_videos_json = json.load(data_file)
-    #
-    # for idx, video in enumerate(all_videos_json['videos']):
-    #     if video['video_name'] == video_name:
-    #         all_videos_json['videos'][idx]['last_processed_datetime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    #         break
-    # else: # if no breaks
-    #     all_videos_json['videos'].append({'video_name': video_name,
-    #                                       'video_url': video_url,
-    #                                       'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
-    #
-    # json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
+    # Open URL in a new tab, if a browser window is already open.
+    log('Opening browser tab with results')
+    url = 'http://localhost:5000/video_results.html?video='
+    # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
+    webbrowser.open_new_tab(url + json_struct['info']['name'])
+
+    # Save video in processed videos json.
+    all_videos_json = {'videos': []}
+    all_videos_json_path = '/home/ben/VideoUnderstanding/example_images/all_videos.json'
+    if os.path.isfile(all_videos_json_path):
+        with open(all_videos_json_path) as data_file:
+            all_videos_json = json.load(data_file)
+
+    for idx, video in enumerate(all_videos_json['videos']):
+        if video['video_name'] == video_name:
+            all_videos_json['videos'][idx]['last_processed_datetime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            break
+    else: # if no breaks
+        all_videos_json['videos'].append({'video_name': video_name,
+                                          'video_url': video_url,
+                                          'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
+
+    json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
 
 def download_video(url,changed_name=None):
     yt = api.YouTube(url)
@@ -189,4 +189,31 @@ def download_video(url,changed_name=None):
     Loads of extra at end but not saving them???
 
      Walk down the times square (https://www.youtube.com/watch?v=ezyrSKgcyJw)
+     No scene changes
+
+     Montage best of youtube snow falls:
+     200-300
+     900-1000
+     1300-1400
+     1400-1500  same scene as 900-1000
+     1800-1900
+     2100-2200
+     2600-2700
+     3400-3500 2 scene changes. tiny 40 frame scene
+     4400-4500
+     4700-4800
+     5200-5300
+     5500-5600
+     5600-5700
+     5700-5800
+     6400-6500
+     6500-6600
+     7100-7200
+     7400-7500
+     7500-7600
+     8600-8700
+     9000-9100
+     9600-9700
+     9700-9800
+     10300-10400
 '''

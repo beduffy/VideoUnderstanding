@@ -13,10 +13,21 @@
 	<svg id="scroll-bar">
         <!--width be representative of what we see on screen todo-->
         <!--TODO popup number below scroll bar to show what scene we are on-->
-        <!--todo DONT HIDE CURPOS AT VERY LEFT AND RIGHT -->
-        <rect id="cur-pos" x="0" y="0" width="20" height="40" style="fill:rgb(0,255,0);">
-        </rect>
+        <!--todo DONT HIDE CUR POS AT VERY LEFT AND RIGHT -->
+        <!--TODO INCREASING screensize hides scrollbar-->
+        <!--<g id="slider" transform="translate(0, 0)">-->
+            <rect id="cur-pos" x="0" y="0" width="20" height="40" style="fill:rgb(0,255,0);">
+            </rect>
+
+            <!--<rect id="cur-pos" width="20" height="40" style="fill:rgb(0,255,0);">-->
+            <!--</rect>-->
+            <!--<text id="text-part" z-index="1000" x="7" y="23" >5</text>-->
+        <!--</g>-->
     </svg>
+    <!--TODO FIX OR NEVER FIX!!!!!!-->
+    <div id="scene-num-slider">
+        5
+    </div>
 
 	<div id="page-wrap">
 		<script id="image-template" type="text/x-handlebars-template">
@@ -24,6 +35,7 @@
             <table id="main-table">
 			{{#each images}}
 				<td>
+                    <!--    TODO MAKE TD IMAGE SIZE SO RED BLOCK IS IMAGE SIZE. OR JUST MAKE RED BLOCK IAMGE SIZE OR BIGGER-->
 					<div class="frame">
 						<img class="img_frame" src="{{addDirectory image_name}}">
 						<div class="description">
@@ -52,7 +64,7 @@
 							<div>Scene number: <span class="scene_number_span">{{scene_num}}</span></div>
 							<br>
 
-                            <div class='scene_desc'>>
+                            <div class='scene_desc'>
 								<h2>Scene Results 1</h2>
                                 {{#each scene_results.scene_results1}}
                                     <div>{{label}} : {{probability}}</div>
@@ -115,7 +127,7 @@
                 </g>
             </svg>
         </div>
-    </td>;
+    </td>
 </script>
 
 <script id="video-info-template" type="text/x-handlebars-template">
@@ -139,10 +151,6 @@
     </td>
 </script>
 
-<!--todo replace below with downloaded jquery and above-->
-<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
-<!--<script src="https://code.jquery.com/jquery-2.2.2.min.js"   integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="   crossorigin="anonymous"></script>-->
-<!--<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js" type="text/javascript"></script>-->
 <script src="jquery-1.12.0.min.js"></script>
 <script src="jquery-ui-1.11.4.min.js"></script>
 <script src="jquery.mousewheel.js"></script>

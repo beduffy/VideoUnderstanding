@@ -29,6 +29,14 @@ def getInfo(sourcePath):
     cap.release()
     return info
 
+def makeOutputDirs(path):
+    #todo this doesn't quite work like mkdirp. it will fail
+
+    if not os.path.isdir(os.path.join(path, "metadata")):
+        os.makedirs(os.path.join(path, "metadata"))
+
+    if not os.path.isdir(os.path.join(path, "images", "full")):
+        os.makedirs(os.path.join(path, "images", "full"))
 
 def scale(img, xScale, yScale):
     res = cv2.resize(img, None,fx=xScale, fy=yScale, interpolation = cv2.INTER_AREA)
@@ -162,7 +170,6 @@ def calculateFrameStats(sourcePath, verbose=False, after_frame=0):
 
 # Take an image and write it out at various sizes.
 #
-# TODO: BEN KEEP AROUND TO EVENTUALLY LOOK AT ALL SMALL IMAGES OF VIDEO FROM AFAR AND SEE IF IT IS EASY TO SPOT SCENE CHANGES FOR A HUMAN
 def writeImagePyramid(destPath, name, seqNumber, image):
     fullPath = os.path.join(destPath, "full", name + "-" + str(seqNumber) + ".png")
     halfPath = os.path.join(destPath, "half", name + "-" + str(seqNumber) + ".png")
@@ -187,72 +194,6 @@ def writeImagePyramid(destPath, name, seqNumber, image):
 # number of pixels that changed from the previous frame are more than 1.85 standard deviations
 # times from the mean number of changed pixels across all interframe changes.
 #
-
-def detect_scenes(cap, json_struct, data, verbose):
-    multiplier = 1.44
-
-    # DOGS BABIES
-    multiplier = 1.25  # 1 missing
-    multiplier = 1.2
-    multiplier = 1.1
-    multiplier = 0.676 # TODO DAMN THATS WAY DIFFERENT rUN SEARCH OB HYPERPARAMETER FOR MULTIPLIER FOR EACH VIDEO.
-
-    multplier_times_sd = (json_struct["stats"]["sd"] * multiplier)
-    mean_plus_multiplier_times_sd = multplier_times_sd + json_struct["stats"]["mean"]
-
-    all_chi_diffs = []
-
-    count = 0
-    for idx, fi in enumerate(data['frame_info']):
-        if fi['chi_diff'] > mean_plus_multiplier_times_sd:
-            right_frame_no = fi['frame_number']
-            left_frame_no = data['frame_info'][idx - 1]['frame_number']
-
-            if verbose:
-                # TODO MAYBE CHANGE FRAMES TEXTS ON IMSHOW TO SAME SO LESS CLUTTER
-                cap.set(cv.CV_CAP_PROP_POS_FRAMES, right_frame_no)
-                ret, right_frame = cap.read()
-
-                frame_text = ('frame_no: {0} -- chi_diff: {1}').format(right_frame_no, data['frame_info'][idx - 1]["chi_diff"])
-                cv2.putText(right_frame, frame_text , (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
-                cv2.imshow('right frame', right_frame)
-
-                # # previous frame
-                # cap.set(cv.CV_CAP_PROP_POS_FRAMES, left_frame_no)
-                # ret, left_frame = cap.read()
-                #
-                # frame_text = ('frame_no: {0} -- chi_diff: {1}').format(left_frame_no, data['frame_info'][idx - 1]["chi_diff"])
-                # cv2.putText(left_frame, frame_text, (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
-                # cv2.imshow('left frame', left_frame)
-
-            # isolate down to 10 range
-            still_count, left_frame_no, right_frame_no = isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no)
-
-            all_chi_diffs.append({'chi_diff': round(fi['chi_diff'], 4), 'frame_range_100': ('{0}-{1}').format(fi['frame_number'] - 100,  fi['frame_number']),
-                                  'frame_range_10': ('{0}-{1}').format(left_frame_no,  right_frame_no),
-                                  'sds_over_mean': round((fi['chi_diff'] - (json_struct["stats"]["mean"])) /  json_struct["stats"]["sd"], 4)})
-            count += 1
-
-
-    all_scene_changes_by_frame_no = sorted(all_chi_diffs, key=lambda k: int(k['frame_range_100'].split('-')[0]))
-    all_scene_changes_by_chi_diff = sorted(all_chi_diffs, key=lambda k: k['chi_diff'])
-
-    json_struct['scene_changes'] = all_scene_changes_by_frame_no
-
-    if verbose:
-        for i in all_scene_changes_by_frame_no:
-            log(i)
-        log('\n\n')
-
-        for i in all_scene_changes_by_chi_diff:
-            log(i)
-
-    # TODO keep expanding this whole section so that when I change to other videos (videos with only 1-2 scenes) I can keep debugging
-
-    log('multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd))
-    log("Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier))
-
-    return all_scene_changes_by_frame_no
 
 def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval):
     # stores all chi differences between every 100 images.
@@ -279,14 +220,12 @@ def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
             }
             data["frame_info"].append(frame_info)
 
-            # todo no need to keep verbose?
-            # if verbose:
-            #     cv2.putText(frame, "chidiff = " + str(chi_diff), (600, 45), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
-            #     cv2.imshow('frame', frame)
+            # cv2.putText(frame, "chidiff = " + str(chi_diff), (600, 45), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 255, 255))
+            # cv2.imshow('frame', frame)
 
             k = cv2.waitKey(1)
             if k == ord('q'):
-                    break
+                break
 
             last_frame = frame
         else:
@@ -310,11 +249,14 @@ def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
     greater_than_two_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (json_struct["stats"]["sd"] * 2) + json_struct["stats"]["mean"]]
     greater_than_three_sd = [fi for fi in data["frame_info"] if fi["chi_diff"] > (json_struct["stats"]["sd"] * 3) + json_struct["stats"]["mean"]]
 
+    for i in greater_than_three_sd:
+        print i
+
     json_struct["stats"]["greater_than_mean"] = len(greater_than_mean)
     json_struct["stats"]["greater_than_median"] = len(greater_than_median)
     json_struct["stats"]["greater_than_one_sd"] = len(greater_than_one_sd)
-    json_struct["stats"]["greater_than_three_sd"] = len(greater_than_three_sd)
     json_struct["stats"]["greater_than_two_sd"] = len(greater_than_two_sd)
+    json_struct["stats"]["greater_than_three_sd"] = len(greater_than_three_sd)
 
     json_struct["stats"]['mean_plus_one_sd'] = (json_struct["stats"]["sd"]) + json_struct["stats"]["mean"]
     json_struct["stats"]['mean_plus_two_sd'] = (json_struct["stats"]["sd"] * 2) + json_struct["stats"]["mean"]
@@ -324,13 +266,81 @@ def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
 
     return cap, data
 
+def detect_scenes(cap, json_struct, data, verbose):
+    multiplier = 1.44
+
+    # DOGS BABIES
+    # multiplier = 1.25  # 1 missing
+    # multiplier = 1.2
+    multiplier = 1.0
+    # multiplier = 0.676 # TODO DAMN THATS WAY DIFFERENT rUN SEARCH OB HYPERPARAMETER FOR MULTIPLIER FOR EACH VIDEO.
+
+    multplier_times_sd = (json_struct["stats"]["sd"] * multiplier)
+    mean_plus_multiplier_times_sd = json_struct["stats"]["mean"] + multplier_times_sd
+
+    log('Standard Deviation Multiplier:', multiplier)
+    log('Mean + (multiplier * standard deviation): ', mean_plus_multiplier_times_sd)
+
+    all_chi_diffs = []
+
+    count = 0
+    for idx, fi in enumerate(data['frame_info']):
+        if fi['chi_diff'] > mean_plus_multiplier_times_sd:
+            right_frame_no = fi['frame_number']
+            left_frame_no = data['frame_info'][idx - 1]['frame_number']
+
+            if verbose:
+                # TODO MAYBE CHANGE FRAMES TEXTS ON IMSHOW TO SAME SO LESS CLUTTER
+                cap.set(cv.CV_CAP_PROP_POS_FRAMES, right_frame_no)
+                ret, right_frame = cap.read()
+
+                frame_text = ('frame_no: {0} -- chi_diff: {1}').format(right_frame_no, data['frame_info'][idx - 1]["chi_diff"])
+                cv2.putText(right_frame, frame_text , (300, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+                cv2.imshow('right frame', right_frame)
+
+            # isolate down to 10 range
+            # still_count, left_frame_no, right_frame_no = isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no)
+
+            # all_chi_diffs.append({'chi_diff': round(fi['chi_diff'], 4), 'frame_range_100': ('{0}-{1}').format(fi['frame_number'] - 100,  fi['frame_number']),
+            #                       'frame_range_10': ('{0}-{1}').format(left_frame_no,  right_frame_no),
+            #                       'sds_over_mean': round((fi['chi_diff'] - (json_struct["stats"]["mean"])) /  json_struct["stats"]["sd"], 4)})
+            all_chi_diffs.append({'chi_diff': round(fi['chi_diff'], 4), 'frame_range_100': ('{0}-{1}').format(fi['frame_number'] - 100,  fi['frame_number']),
+                                  'sds_over_mean': round((fi['chi_diff'] - (json_struct["stats"]["mean"])) /  json_struct["stats"]["sd"], 4)})
+            count += 1
+
+
+    all_scene_changes_by_frame_no = sorted(all_chi_diffs, key=lambda k: int(k['frame_range_100'].split('-')[0]))
+    all_scene_changes_by_chi_diff = sorted(all_chi_diffs, key=lambda k: k['chi_diff'])
+
+    json_struct['scene_changes'] = all_scene_changes_by_frame_no
+
+    # if verbose:
+    for i in all_scene_changes_by_frame_no:
+        log(i)
+    log('\n\n')
+
+    for i in all_scene_changes_by_chi_diff:
+        log(i)
+
+    # TODO keep expanding this whole section so that when I change to other videos (videos with only 1-2 scenes) I can keep debugging
+
+    log('multiplier * sd + mean: ', str(mean_plus_multiplier_times_sd))
+    log("Number of images taken: {0}. Number of images over {2} times standard deviation plus mean: {1}".format(idx, count, multiplier))
+
+    return all_scene_changes_by_frame_no
+
+
+
 def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbose):
     dest_dir = os.path.join(destPath, "images")
 
     # TODO make sd multiplier externally configurable
     # diff_threshold = (json_struct["stats"]["sd"] * 1.85) + json_struct["stats"]["mean"]
     # diff_threshold = (json_struct["stats"]["sd"] * 2.5) + json_struct["stats"]["mean"]
-    diff_threshold = (json_struct["stats"]["sd"] * 3.5) + json_struct["stats"]["mean"]
+    # diff_threshold = (json_struct["stats"]["sd"] * 3.5) + json_struct["stats"]["mean"]
+
+    # for i in json_struct["stats"]["greater_than_three_sd"]:
+    #     print i
 
     json_struct['images'] = []
 
@@ -368,9 +378,9 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
 
         #MASSIVE BUG CANT GET FINAL FRAMES
 
-        log('Saving scene frames between: ', left_scene_first_frame, '-', right_scene_first_frame)
-        log('Range: ', range, 'jump rate: ', jump_rate)
-        log('Scene number: ', scene_num)
+        # log('Saving scene frames between: ', left_scene_first_frame, '-', right_scene_first_frame)
+        # log('Range: ', range, 'jump rate: ', jump_rate)
+        # log('Scene number: ', scene_num)
 
         frames_taken = 0
         while frames_taken < num_frames_in_scene:
@@ -393,7 +403,7 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
                 fullPath = os.path.join(dest_dir, "full", image_name)
                 cv2.imwrite(fullPath, frame)
 
-                log(fullPath)
+                # log(fullPath)
 
                 avg_colour = [0.0, 0.0, 0.0]
                 total = 10000.0
@@ -401,10 +411,8 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
                     weight = colour['count'] / total
                     for idx, num in enumerate(colour['col']):
                         avg_colour[idx] += weight * num
-                        # avg_colour.append(weight * num)
 
-                hist = histogram.calculate_hist(frame)
-                hist_features[image_name] = hist
+                hist_features[image_name] = histogram.calculate_histograms(frame)
 
                 json_struct['images'].append({'image_name': image_name, 'frame_number': current_frame_num, 'scene_num': scene_num,
                                               'dominant_colours': {'kmeans' : dom_colours, 'avg_colour': {'col': avg_colour}}, })
@@ -426,20 +434,6 @@ def save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbo
         log('AFTER left_scene_first_frame: ', left_scene_first_frame, ' right_scene_first_frame: ', right_scene_first_frame)
     json_struct['info']['num_scenes'] = scene_num - 1 # TODO double check if right?
     return hist_features
-
-def process_video(sourcePath, destPath, name, json_struct, verbose=False, interval=100):
-    cap, data = compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
-    detect_scenes(cap, json_struct, data, verbose)
-    hist_features = save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbose)
-    compute_avg_col_dist_and_chi_diff(hist_features, json_struct)
-    # TODO NEW FUNCTION
-
-    json_struct['info']['num_images'] = len(json_struct['images'])
-    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
-
-    cap.release()
-    cv2.destroyAllWindows()
-    # return data # TODO ???
 
 def compute_avg_col_dist_and_chi_diff(hist_features, json_struct):
     # compute euclidian distance from avg colours. Then computer histogram chi distance between every consecutive frame.
@@ -512,6 +506,8 @@ def isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no):
     # cv2.imshow(str(fi['frame_number']), frame)
     # test_count = 0
 
+    #TODO THIS FUNCTION CAN CONFIRM HOW LIKELY A SCENE CHANGE IT IS!!!
+
     # Make False if error found!
     still_count = True
 
@@ -567,15 +563,19 @@ def isolate_from_100_to_10_range(cap, left_frame_no, right_frame_no):
 
     return (still_count, left_frame_no, right_frame_no)
 
-def makeOutputDirs(path):
-    #todo this doesn't quite work like mkdirp. it will fail
+def process_video(sourcePath, destPath, name, json_struct, verbose=False, interval=100):
+    cap, data = compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
+    detect_scenes(cap, json_struct, data, verbose)
+    hist_features = save_all_relevant_frames(cap, sourcePath, destPath, name, json_struct, verbose)
+    compute_avg_col_dist_and_chi_diff(hist_features, json_struct)
+    # TODO NEW FUNCTION
 
-    if not os.path.isdir(os.path.join(path, "metadata")):
-        os.makedirs(os.path.join(path, "metadata"))
+    json_struct['info']['num_images'] = len(json_struct['images'])
+    json_struct['info']['length'] = round(json_struct['info']['framecount'] / json_struct['info']['fps'], 3)
 
-    if not os.path.isdir(os.path.join(path, "images", "full")):
-        os.makedirs(os.path.join(path, "images", "full"))
-
+    cap.release()
+    cv2.destroyAllWindows()
+    # return data # TODO ???
 
 def main_separate_scenes(json_struct, video_path, verbose=True):
     start = timer()
@@ -606,5 +606,6 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     #todo log info one at a time!!!!!!!!
     log("Video Info: ", json_struct['info'], color='green', header=HEADER_SIZE)
     log("Video scene and frame extraction complete.", color='green', header=HEADER_SIZE)
+    log("Video separated into ", json_struct['info']['num_scenes'], " scenes.", color='green', header=HEADER_SIZE)
     end = timer()
     log('Time taken:', round((end - start), 5), 'seconds.')

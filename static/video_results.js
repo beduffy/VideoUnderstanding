@@ -6,6 +6,7 @@
 	var frameWidth = 500.0;
 	var numDominantColours;
 
+    //var $slider = $('#cur-pos');
     var $slider = $('#cur-pos');
     var $scrollBar = $('#scroll-bar');
 
@@ -49,6 +50,7 @@
 			var y = e.pageY - this.offsetTop;
             x -= document.body.scrollLeft;
             $slider.attr('x', x);
+            //$slider.attr('transform', "translate(" + x + ", 0)");
             var fraction = x / 500.0;
             document.body.scrollLeft = Math.round(fraction * document.body.scrollWidth);
 		});
@@ -59,11 +61,14 @@
             $(event.target.parentElement).append( event.target );
           })
           .bind('drag', function(event, ui){
-            // update coordinates manually, since top/left style props don't work on SVG
+              // update coordinates manually, since top/left style props don't work on SVG
               event.target.setAttribute('x', ui.position.left);
-//              event.target.setAttribute('y', ui.position.top);
+              //event.target.setAttribute('transform', "translate(" + ui.position.left + ", 0)");
 
               var fraction = $slider.attr('x') / 500.0;
+              //var s = $slider.attr('transform').split(',')[0].split('(')[1];
+              //console.log(s);
+              //var fraction = ui.position.left / 500.0;
               document.body.scrollLeft = fraction * document.body.scrollWidth;
           }).bind('mouseup', function(event, ui) {
             $scrollBar.css('opacity', 0.8); //todo good?
@@ -123,11 +128,10 @@
                 var seconds = frac * Math.round(data.info.length);
                 seconds = Math.round(seconds);
                 var m = Math.floor(seconds / 60);
-                var s = seconds - m * 60;
+                var s = (seconds - m * 60).toString();
+                if (s.length === 1) s = "0" + s;
                 return m + ":" + s;
             });
-
-//            frameNoToTime
 
 			Handlebars.registerHelper('addDirectory', function(image_name) {
 				return imageDirectory + image_name;
@@ -209,13 +213,9 @@
                     var theCompiledHtmljQ = $(theTemplate(data.scenes[this_scene_number])); //this or last
 
                     theCompiledHtmljQ.insertBefore($this);
-
-//					$this.find('.description').append("");  //todo why was this here?
                     lastSceneNumber = this_scene_number;
 				}
 			});
-
-
 
             var headerScript = $("#video-info-template").html();
 			var headerTemplate = Handlebars.compile(headerScript);
@@ -227,6 +227,7 @@
                 $('#video-title').css('color', rgbString);
             }
 
+            // All gif code
             var imageFromEachScene = [];
             var NUM_IMAGES_PER_SCENE = 5; //TODO change in future
 
@@ -241,19 +242,23 @@
             var $gifSceneNum = $('#gif-scene-num');
             $gif.attr('src', imageFromEachScene[currImageIndex++]);
 
+            var gifChangeSpeed = 400;
+
             var gifInterval;
             $gif.mouseover(function() {
                 gifInterval = setInterval(function () {
                     $gifSceneNum.text(currImageIndex); //todo
+
                     $gif.attr('src', imageFromEachScene[currImageIndex++]);
+
                     if (currImageIndex >= numGifImages) currImageIndex = 0;
-                }, 250);
+                }, gifChangeSpeed);
             }).mouseout(function() {
                 clearInterval(gifInterval);
             });
 
-            // Scenes might have different widths?
-            var allXs = [];
+            // Scene dividers on scroll bar
+            var allXs = []; // Scenes might have different widths? Need to store all x's
             var sceneDividerWidth = 3;
             $('.scene-change-divider-td').each(function(index) {
                 var x = Math.round(($(this).offset().left / document.body.scrollWidth) * 500.0);
@@ -269,21 +274,22 @@
                     fill: "red"
                 });
 
-                $scrollBar.append(bar);
+                $scrollBar.prepend(bar);
             });
 
-//            console.log('diff: ', l[5] - l[4], l[2] - l[1]);
-
+            // Scene average colours on scroll bar
             var currX = 0;
-            //var sceneWidthOnBar = 15;
+            console.log('num_scenes:', data.scenes.length, 'allx len', allXs.length);
             for (var i = 0; i < data.scenes.length; i++) {
                 var r = Math.round(data.scenes[i].average_colour[0]);
                 var g = Math.round(data.scenes[i].average_colour[1]);
                 var b = Math.round(data.scenes[i].average_colour[2]);
                 var fillColorString = "rgb(" + r + ", " + g + ", " + b + ")";
 
-                if (i - 1 >= 0) var barWidth = allXs[i] - allXs[i - 1] + sceneDividerWidth;
-                else var barWidth = allXs[i];
+
+                if (i + 1 < data.scenes.length) var barWidth = allXs[i + 1] - allXs[i] - sceneDividerWidth;
+                else var barWidth = allXs[i - 1 + 1] - allXs[i - 1] - sceneDividerWidth; //slighly fragile
+                currX = allXs[i] + sceneDividerWidth;
 
                 var bar = $(document.createElementNS("http://www.w3.org/2000/svg", "rect")).attr({
                     x: currX,
@@ -293,11 +299,10 @@
                     fill: fillColorString
                 });
 
-                $scrollBar.append(bar);
+                $scrollBar.prepend(bar);
 
-                currX = allXs[i] + sceneDividerWidth;
                 console.log('index:', i, ' curX:', currX);
-//                currX += sceneWidthOnBar;
+                console.log('barWidth:', barWidth);
             }
         })
     }
