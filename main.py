@@ -17,8 +17,6 @@
 # display the results in OpenCV as well if needed. The difficult part is filling the json_struct.
 # }
 
-#TODO put images in folder inside folder e.g. AnimalsBabies5mins/images
-# TODO HAVE TEST FUNCTION SO I DON;T HAVE TO WAIT FOR RESULTS. RUN ON OLD EXAMPLE IMAGES
 
 from video_extraction import filmstrip
 from python_features import scene_classification
@@ -34,7 +32,7 @@ from pprint import pprint
 from utilities.globals import log
 import datetime, time
 
-def process_video(video_path, video_url):
+def process_video(video_path, video_url, multiplier=1.0):
     #todo pass all below in one dictionary to save calculating every time?
     video_name = video_path.split('/')[-1][:-4]
     directory = os.path.dirname(video_path)
@@ -48,7 +46,7 @@ def process_video(video_path, video_url):
 
     # main processing sub functions ------------------
 
-    filmstrip.main_separate_scenes(json_struct, video_path, False)
+    filmstrip.main_separate_scenes(json_struct, video_path, False, multiplier)
 
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
     # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
@@ -58,6 +56,7 @@ def process_video(video_path, video_url):
     scene_results.average_all_scene_results(json_struct, json_struct_path)
 
     # ---------------------------------
+    json_struct['info']['url'] = video_url
 
     # Open URL in a new tab, if a browser window is already open.
     log('Opening browser tab with results')
@@ -102,6 +101,9 @@ def download_video(url,changed_name=None):
         yt.set_filename(changed_name)
 
     yt.set_filename(yt.filename.replace(" ", "_"))
+    yt.set_filename(yt.filename.replace("&", "and"))
+    yt.set_filename((yt.filename).encode('ascii', 'ignore').decode('ascii'))
+
 
     log('Video Name: ', yt.filename)
 
@@ -133,28 +135,16 @@ def download_video(url,changed_name=None):
 
     return yt.filename
 
-# webbrowser.get('chromium')
-# webbrowser.open('file:///' + '/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/metadata/result_struct.json')
-# open('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/metadata/result_struct.json')
-# todo fix anotehr time?
 
-# TODO CREATE SAVE JSON TO FILE AND LOAD JSON FROM FILE FUNCTIONS TO UTITLITES?
 # TODO show full json file in browser
-# TODO open browser first and display alll prints there. Then animate into each section
-# TODO or open browser and refresh after each step
-# TODO video class? to access globals or just keep json_struct?
-# tODO FIND best frame in scene most representative for gif
-#todo store port number?
-
-# download_video('https://www.youtube.com/watch?v=0Y4r9YcLXDM')
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)
 # process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
-# create_tasks_file_from_json('/home/ben/VideoUnderstanding/example_images/Animals6mins/metadata/result_struct.json')
-# video_into_all_frames('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
 '''
-    Animals6mins
+    Montage video results
+
+    Funny_Videos_Of_Funny_Animals_NEW_2015
     17 scene changes
     key frames for above:
     201-211
@@ -171,7 +161,6 @@ def download_video(url,changed_name=None):
     7231-7241
     7951-7961
     8791-8801
-    9931-8941 blackness of arm
     9571-9581
     10281-10291
 
@@ -191,7 +180,7 @@ def download_video(url,changed_name=None):
      Walk down the times square (https://www.youtube.com/watch?v=ezyrSKgcyJw)
      No scene changes
 
-     Montage best of youtube snow falls:
+     Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People
      200-300
      900-1000
      1300-1400
@@ -216,4 +205,9 @@ def download_video(url,changed_name=None):
      9600-9700
      9700-9800
      10300-10400
+
+    Best_of_2015_Cute_Funny_Animals
+
+
+    Dogs_Who_Fail_At_Being_Dogs
 '''

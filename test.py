@@ -63,7 +63,7 @@ def changeImage(cap, frame_number, frame_count):
         return
 
     text = "frame_no: " + str(frame_number)
-    cv2.putText(frame, text, (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+    cv2.putText(frame, text, (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255))
     cv2.imshow('Frame', frame)
     cv2.waitKey(1)
 
@@ -104,7 +104,9 @@ def optical_flow(video_path):
 
 # optical_flow('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
+video_step_through('/home/ben/VideoUnderstanding/example_images/Hilarious_NBA_Interviews_Part_2/Hilarious_NBA_Interviews_Part_2.mp4')
+
 # video_step_through('/home/ben/VideoUnderstanding/example_images/Funny_Videos_Of_Funny_Animals_NEW_2015/Funny_Videos_Of_Funny_Animals_NEW_2015.mp4')
-video_step_through('/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People.mp4')
+# video_step_through('/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People.mp4')
 # video_step_through('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
 

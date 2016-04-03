@@ -74,7 +74,7 @@
 //            console.log('')
             $.post("/download_video/", dataToSend, function (data, status) {
                 console.log('DATA FROM AJAX: ', data);
-                printToConsole({s: 'Video Downloaded.', color: 'green'});
+//                printToConsole({s: 'Video Downloaded.', color: 'green'});
                 printToConsole({s: data});
                 videoName = data; // todo for now
 
@@ -141,6 +141,13 @@
             }
 
             if (typeof title !== 'undefined') {
+
+                /*
+
+                TODO NEW NIDEO IS UNALIGENED WITHOUT TITLE!!!!
+
+                 */
+
                 // Already processed before
                 // if title exists add title to video holder and add process again button
                 var titleString = '<h3 class="video_title">' + title + '</h3>';

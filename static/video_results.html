@@ -11,23 +11,12 @@
 
 <body>
 	<svg id="scroll-bar">
-        <!--width be representative of what we see on screen todo-->
         <!--TODO popup number below scroll bar to show what scene we are on-->
         <!--todo DONT HIDE CUR POS AT VERY LEFT AND RIGHT -->
         <!--TODO INCREASING screensize hides scrollbar-->
-        <!--<g id="slider" transform="translate(0, 0)">-->
-            <rect id="cur-pos" x="0" y="0" width="20" height="40" style="fill:rgb(0,255,0);">
-            </rect>
-
-            <!--<rect id="cur-pos" width="20" height="40" style="fill:rgb(0,255,0);">-->
-            <!--</rect>-->
-            <!--<text id="text-part" z-index="1000" x="7" y="23" >5</text>-->
-        <!--</g>-->
+        <rect id="cur-pos" x="0" y="0" width="20" height="40" style="fill:rgb(0,255,0);">
+        </rect>
     </svg>
-    <!--TODO FIX OR NEVER FIX!!!!!!-->
-    <div id="scene-num-slider">
-        5
-    </div>
 
 	<div id="page-wrap">
 		<script id="image-template" type="text/x-handlebars-template">
@@ -137,11 +126,19 @@
             <div>Number of frames: {{info.framecount}}</div>
             <div>Number of images:  {{info.num_images}}</div>
             <div>Number of scenes:  {{info.num_scenes}}</div>
+            <div>Images per scene: {{info.INITIAL_NUM_FRAMES_IN_SCENE}}</div>
+
+            <div>Multplier: {{info.multiplier}}</div>
+            <div>Scene change detected if image has chi-difference that is {{info.multiplier}} standard deviations over the mean.</div>
+            <div>This chi-difference equals: {{toFixed info.mean_plus_multiplier_times_sd 2}}</div>
+
+            <div>Standard deviations over mean: {{info.sds_over_mean}}</div>
             <div>FPS: {{toFixed info.fps 2}}</div>
             <div>Length: {{secondsToMinutes info.length}} minutes</div>
             <div>Length: {{toFixed info.length 0}}</div>
             <div>Resolution: {{info.width}}x{{info.height}}</div>
-            <div>Show average results of all scenes below.</div>
+            <div id="video-url">Youtube URL: {{info.url}}</div>
+            <div>Show average results of all scenes below. Show STATS!!!!</div>
             <h2>Gif</h2>
             <div class="frame">
                 <img id="gif" class="img_frame" src="">

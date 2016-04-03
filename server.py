@@ -47,10 +47,15 @@ def process_video():
     current_dir = os.path.dirname(os.path.realpath(__file__))
     video_path = os.path.join(current_dir, 'example_images', data['name'], data['name'] + '.mp4') #TODO VERY CAREFUL HERE MIGHT NOT BE MP4
 
-    thread.start_new_thread(main.process_video, (video_path, data['url']))
+    # Incase in future I want to specify multiplier
+    if data.get('multiplier'):
+        thread.start_new_thread(main.process_video, (video_path, data['url'], data['multiplier']))
+    else:
+        thread.start_new_thread(main.process_video, (video_path, data['url']))
+
 
     # todo change
-    return 'Video has completed processing'
+    return ''
 
 # get image
 @app.route('/example_images/<path:path>')

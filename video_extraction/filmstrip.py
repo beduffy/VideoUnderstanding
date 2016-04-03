@@ -267,16 +267,12 @@ def compute_chi_diff_on_all_interval(sourcePath, json_struct, verbose, interval)
     return cap, data
 
 def detect_scenes(cap, json_struct, data, verbose):
-    multiplier = 1.44
-
-    # DOGS BABIES
-    # multiplier = 1.25  # 1 missing
-    # multiplier = 1.2
-    multiplier = 1.0
-    # multiplier = 0.676 # TODO DAMN THATS WAY DIFFERENT rUN SEARCH OB HYPERPARAMETER FOR MULTIPLIER FOR EACH VIDEO.
+    multiplier = json_struct['info']['multiplier']
 
     multplier_times_sd = (json_struct["stats"]["sd"] * multiplier)
     mean_plus_multiplier_times_sd = json_struct["stats"]["mean"] + multplier_times_sd
+
+    json_struct['info']['mean_plus_multiplier_times_sd'] = mean_plus_multiplier_times_sd
 
     log('Standard Deviation Multiplier:', multiplier)
     log('Mean + (multiplier * standard deviation): ', mean_plus_multiplier_times_sd)
@@ -455,7 +451,7 @@ def compute_avg_col_dist_and_chi_diff(hist_features, json_struct):
         dist = distance.euclidean(next_avg_colour, cur_avg_colour)
         image['dominant_colours']['l2distnext'] = round(dist, 3)
 
-        # HISTOGRAM BELOW
+        # Calculate chi distance between next image
         cur_hist = hist_features[image['image_name']]
         next_hist = hist_features[json_struct['images'][idx + 1]['image_name']]
         chi_dist_next = histogram.chi2_distance(cur_hist, next_hist)
@@ -577,7 +573,7 @@ def process_video(sourcePath, destPath, name, json_struct, verbose=False, interv
     cv2.destroyAllWindows()
     # return data # TODO ???
 
-def main_separate_scenes(json_struct, video_path, verbose=True):
+def main_separate_scenes(json_struct, video_path, verbose=True, multiplier=1.0):
     start = timer()
 
     # TODO rename above to process video and put process_video inside here.
@@ -592,6 +588,7 @@ def main_separate_scenes(json_struct, video_path, verbose=True):
     json_struct['info'] = getInfo(video_path)
     json_struct['info']['name'] = name
     json_struct['info']['INITIAL_NUM_FRAMES_IN_SCENE'] = 5
+    json_struct['info']['multiplier'] = multiplier
 
     makeOutputDirs(directory)
 

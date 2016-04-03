@@ -118,7 +118,8 @@
             Handlebars.registerHelper('secondsToMinutes', function(seconds) {
                 seconds = Math.round(seconds);
                 var m = Math.floor(seconds / 60);
-                var s = seconds - m * 60;
+                var s = (seconds - m * 60).toString();
+                if (s.length === 1) s = "0" + s;
                 return m + ":" + s;
             });
 
@@ -229,7 +230,7 @@
 
             // All gif code
             var imageFromEachScene = [];
-            var NUM_IMAGES_PER_SCENE = 5; //TODO change in future
+            var NUM_IMAGES_PER_SCENE = data.info.INITIAL_NUM_FRAMES_IN_SCENE || 5; //TODO change in future
 
             // seems very fragile todo
             for (var i = NUM_IMAGES_PER_SCENE - 2; i < data.images.length; i += NUM_IMAGES_PER_SCENE) {
@@ -262,7 +263,7 @@
             var sceneDividerWidth = 3;
             $('.scene-change-divider-td').each(function(index) {
                 var x = Math.round(($(this).offset().left / document.body.scrollWidth) * 500.0);
-                console.log('index:', index, ' x: ', x, 'x + width: ', x + sceneDividerWidth);
+                //console.log('index:', index, ' x: ', x, 'x + width: ', x + sceneDividerWidth);
 
                 allXs.push(x);
 
@@ -301,8 +302,8 @@
 
                 $scrollBar.prepend(bar);
 
-                console.log('index:', i, ' curX:', currX);
-                console.log('barWidth:', barWidth);
+                //console.log('index:', i, ' curX:', currX);
+                //console.log('barWidth:', barWidth);
             }
         })
     }

@@ -50,6 +50,7 @@
 
         .video_title {
             color: #0BA008;
+            word-wrap: break-word;
         }
 
         /*body {*/
