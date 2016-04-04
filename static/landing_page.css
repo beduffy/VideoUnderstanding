@@ -13,7 +13,7 @@
 
         .video_holder {
             width: 560px;
-            height: 450px;
+            height: 515px;
             display: inline-block;
         }
 
@@ -51,6 +51,7 @@
         .video_title {
             color: #0BA008;
             word-wrap: break-word;
+            height: 95px;
         }
 
         /*body {*/

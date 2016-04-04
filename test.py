@@ -104,7 +104,8 @@ def optical_flow(video_path):
 
 # optical_flow('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
 
-video_step_through('/home/ben/VideoUnderstanding/example_images/Hilarious_NBA_Interviews_Part_2/Hilarious_NBA_Interviews_Part_2.mp4')
+video_step_through('/home/ben/VideoUnderstanding/example_images/Best_of_2015_Cute_Funny_Animals/Best_of_2015_Cute_Funny_Animals.mp4')
+# video_step_through('/home/ben/VideoUnderstanding/example_images/Best_WINFAIL_Compilation_2016__Funny_FAIL_and_WIN_Videos__January_2016/Best_WINFAIL_Compilation_2016__Funny_FAIL_and_WIN_Videos__January_2016.mp4')
 
 # video_step_through('/home/ben/VideoUnderstanding/example_images/Funny_Videos_Of_Funny_Animals_NEW_2015/Funny_Videos_Of_Funny_Animals_NEW_2015.mp4')
 # video_step_through('/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People.mp4')

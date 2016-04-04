@@ -29,7 +29,7 @@ import webbrowser
 # from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
 from pytube import api, exceptions
 from pprint import pprint
-from utilities.globals import log
+from utilities.globals import log, HEADER_SIZE
 import datetime, time
 
 def process_video(video_path, video_url, multiplier=1.0):
@@ -44,13 +44,12 @@ def process_video(video_path, video_url, multiplier=1.0):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
+    log('Processing video:', video_name, header=HEADER_SIZE)
+
     # main processing sub functions ------------------
 
     filmstrip.main_separate_scenes(json_struct, video_path, False, multiplier)
-
     # fast_rcnn_20.main_object_detect(json_struct, video_path)
-    # print 'DIRECTORY after execution of fast rcnn is: ', os.getcwd()
-
     # scene_classification.main_scene_classification(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
     scene_results.average_all_scene_results(json_struct, json_struct_path)
@@ -61,7 +60,8 @@ def process_video(video_path, video_url, multiplier=1.0):
     # Open URL in a new tab, if a browser window is already open.
     log('Opening browser tab with results')
     url = 'http://localhost:5000/video_results.html?video='
-    # webbrowser.open_new_tab('file:///' + json_struct_path) #todo fix another time?
+    #todo make open browser another time. For now it opens file. uncomment.
+    # webbrowser.open_new_tab('file:///' + json_struct_path)
     webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # Save video in processed videos json.
@@ -137,6 +137,8 @@ def download_video(url,changed_name=None):
 
 
 # TODO show full json file in browser
+
+# process_video('/home/ben/VideoUnderstanding/example_images/Best_of_2015_Cute_Funny_Animals/Best_of_2015_Cute_Funny_Animals.mp4', 'https://www.youtube.com/watch?v=xv3l1Blx6JQ')
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)
 # process_video('/home/ben/VideoUnderstanding/example_images/DogsBabies5mins/DogsBabies5mins.mp4')
