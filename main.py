@@ -53,10 +53,10 @@ def process_video(video_path, video_url, multiplier=1.0):
 
     # RENAME ALL FUNCTIONS AND TAKE SCREENSHOT TODO
     # filmstrip.main_separate_scenes(json_struct, video_path, video_url, False, multiplier)
+    # scene_classification.main_scene_classification(json_struct, video_path)
     # faster_rcnn_20_detection.main_object_detect(json_struct, video_path)
-    # yolo_object_detection.main_object_detect(json_struct, video_path)
-    scene_classification.main_scene_classification(json_struct, video_path)
-    # scene_results.average_all_scene_results(json_struct, json_struct_path)
+    yolo_object_detection.main_object_detect(json_struct, video_path)
+    scene_results.average_all_scene_results(json_struct, json_struct_path)
 
     # ---------------------------------
 
@@ -64,7 +64,7 @@ def process_video(video_path, video_url, multiplier=1.0):
     log('Opening browser tab with results')
     url = 'http://localhost:5000/video_results.html?video='
     #todo make open browser another time. For now it opens file. uncomment.
-    # webbrowser.open_new_tab('file:///' + json_struct_path)
+    webbrowser.open_new_tab('file:///' + json_struct_path)
     webbrowser.open_new_tab(url + json_struct['info']['name'])
 
     # Save video in processed videos json.
@@ -89,7 +89,7 @@ def process_video(video_path, video_url, multiplier=1.0):
     seconds = round(end - start, 0);
     m, s = divmod(seconds, 60)
     log('All processing completed', color='green', header=1)
-    log('TOTAL PROCESSING TIME TAKEN: ', "%02d:%02d" % (m, s), 'seconds.', color='chartreuse', header=1)
+    log('TOTAL PROCESSING TIME TAKEN: ', "%02d:%02d" % (m, s), color='chartreuse', header=1)
     log('')
     log('')
 

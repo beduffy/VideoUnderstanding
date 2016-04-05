@@ -48,7 +48,7 @@ def main_object_detect(json_struct, video_path):
                     log(line)
                     object_list_next = True
 
-        json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
+        # json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
         end = timer()
         log('Faster R-CNN Object Detection complete', header=HEADER_SIZE, color='green')

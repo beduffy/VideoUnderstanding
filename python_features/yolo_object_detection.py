@@ -32,38 +32,49 @@ def main_object_detect(json_struct, video_path):
 
         num_images = len(json_struct['images'])
 
+        pipe = Popen(split_command,  stdin=PIPE, stdout=PIPE, stderr=PIPE)
         for idx, image in enumerate(json_struct['images']):
-            pipe = Popen(split_command,  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
             path = os.path.join(image_directory_path, image['image_name']) + '\n'
-            output, err = pipe.communicate(path)
+            # output, err = pipe.communicate(path)
+            pipe.stdin.write(path)
 
-            object_label_probs = output.split('\n')
-            predict_message = object_label_probs[0]
-            time_for_prediction = predict_message.split(' ')[-2]
-            object_label_probs = object_label_probs[1:-1]
+            while True:
+                line = pipe.stdout.readline()
+                if not line: break
+                print line
+            # pipe.stdout.readline()
 
-            for i, s in enumerate(object_label_probs):
-                split = s.split(':')
-                object_label_probs[i] = {'class': split[0], 'score': split[1][1:]}
-
-            log("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
-            # print ("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
-            if object_label_probs:
-                log('Objects detected: ', object_label_probs)
-
-            # TODO open predictions.png save in section other than full images!!!!
-
-            # if not image.get('object_lists'): #todo if testing yolo before rcnn
-            #     log('inside here')
-            image['object_lists'] = {}
-            image['object_lists']['yolo_20'] = object_label_probs
-
-        json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
-
-        end = timer()
-        log('YOLO Object Detection complete', header=HEADER_SIZE, color='green')
-        # log('Average Time taken per image: {}'.format(average_time_per_image))
-        log('Time taken for YOLO object detection:', round((end - start), 5), 'seconds', color='chartreuse')
+        #     object_label_probs = pipe.stdout.readlines()
+        #     print object_label_probs
+        #
+        #     # object_label_probs = output.split('\n')
+        #     predict_message = object_label_probs[0]
+        #     time_for_prediction = predict_message.split(' ')[-2]
+        #     object_label_probs = object_label_probs[1:-1]
+        #
+        #     for i, s in enumerate(object_label_probs):
+        #         split = s.split(':')
+        #         object_label_probs[i] = {'class': split[0], 'score': split[1][1:]}
+        #
+        #     log("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
+        #     # print ("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
+        #     if object_label_probs:
+        #         log('Objects detected: ', object_label_probs)
+        #
+        #     # TODO open predictions.png save in section other than full images!!!!
+        #
+        #     # if not image.get('object_lists'): #todo if testing yolo before rcnn
+        #     #     log('inside here')
+        #     # image['object_lists'] = {}
+        #     image['object_lists']['yolo_20'] = object_label_probs
+        #
+        # json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
+        #
+        # end = timer()
+        # log('YOLO Object Detection complete', header=HEADER_SIZE, color='green')
+        # # log('Average Time taken per image: {}'.format(average_time_per_image))
+        # log('Time taken for YOLO object detection:', round((end - start), 5), 'seconds', color='chartreuse')
 
 # json_struct_path = '/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/metadata/result_struct.json'
 # with open(json_struct_path) as data_file:

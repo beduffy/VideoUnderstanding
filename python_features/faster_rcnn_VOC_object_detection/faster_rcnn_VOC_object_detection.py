@@ -239,7 +239,6 @@ def main_object_detect(json_struct_path, video_path):
     for idx, image_info in enumerate(json_struct['images']):
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         # print 'Detecting objects for {}'.format(image_info['image_name'])
-        # print 'D'
 
         image_path = ('{0}/{1}').format(image_directory_path, image_info['image_name'])
         # print image_info['image_name']

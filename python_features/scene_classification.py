@@ -49,7 +49,9 @@ def classify_scene(net, image_path):
     # input preprocessing: 'data' is the name of the input blob == net.inputs[0]
     transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
     transformer.set_transpose('data', (2,0,1))
-    transformer.set_mean('data', np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1)) # mean pixel
+    # transformer.set_mean('data', np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1)) # mean pixel
+    transformer.set_mean('data', np.load('/home/ben/Documents/py-faster-rcnn/caffe-fast-rcnn/python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1)) # mean pixel
+
     transformer.set_raw_scale('data', 255)  # the reference model operates on images in [0,255] range instead of [0,1]
     # transformer.set_channel_swap('dataprint', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
@@ -67,7 +69,8 @@ def classify_scene(net, image_path):
 
     # load labels
     # imagenet_labels_filename = caffe_root + 'data/ilsvrc12/synset_words.txt'
-    imagenet_labels_filename = '/home/ben/Downloads/placesCNN/categoryIndex_places205.csv'
+    # imagenet_labels_filename = '/home/ben/Downloads/placesCNN/categoryIndex_places205.csv'
+    imagenet_labels_filename = '/home/ben/VideoUnderstanding/models_prototxts/categoryIndex_places205.csv'
     labels = np.loadtxt(imagenet_labels_filename, str, delimiter='\t')
 
     # sort top k predictions from softmax output
@@ -90,8 +93,8 @@ def main_scene_classification(json_struct, video_path):
     log('Main function. Starting Scene Classification', header=HEADER_SIZE - 1, color='darkturquoise')
     start = timer()
 
-    places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
-    googlenet205model = {'prototxt' : '/home/ben/VideoUnderstanding/python_features/deploy_places205.protxt', 'caffemodel' : '/home/ben/VideoUnderstanding/python_features/googlelet_places205_train_iter_2400000.caffemodel'}
+    places205model = {'prototxt' : '/home/ben/VideoUnderstanding/models_prototxts/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/VideoUnderstanding/models_prototxts/places205CNN_iter_300000.caffemodel'}
+    googlenet205model = {'prototxt' : '/home/ben/VideoUnderstanding/models_prototxts/deploy_places205.protxt', 'caffemodel' : '/home/ben/VideoUnderstanding/models_prototxts/googlelet_places205_train_iter_2400000.caffemodel'}
 
     all_scene_models = []
     all_scene_models.append(places205model)
