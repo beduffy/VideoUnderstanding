@@ -1,10 +1,10 @@
 import os
-import shlex,subprocess
 from subprocess import Popen, PIPE
-from time import sleep
 import json
 from utilities.globals import log, HEADER_SIZE, cd
+# from utilities.globals import cd
 from timeit import default_timer as timer
+import cv2
 
 # Pascal VOC 2012 dataset. It can detect the 20 Pascal object classes:
 
@@ -14,7 +14,7 @@ from timeit import default_timer as timer
 # bottle, chair, dining table, potted plant, sofa, tv/monitor
 
 def main_object_detect(json_struct, video_path):
-    log('Starting YOLO Object Detection', header=HEADER_SIZE)
+    log('Main function. Starting YOLO Object Detection', header=HEADER_SIZE - 1, color='darkturquoise')
     start = timer()
 
     directory = os.path.dirname(video_path)
@@ -22,7 +22,8 @@ def main_object_detect(json_struct, video_path):
     json_struct_path = os.path.join(directory, 'metadata', 'result_struct.json')
 
     with cd('/home/ben/Documents/darknet'):
-        darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights" ##TODO more weights for better accuracy. And bigger cfg.
+        # darknet_command = "./darknet yolo test cfg/yolo-tiny.cfg yolo-tiny.weights"
+        darknet_command = "./darknet yolo test cfg/yolo-small.cfg yolo-small.weights"
         split_command = darknet_command.split(' ')
 
         if os.path.isfile(json_struct_path):
@@ -34,7 +35,6 @@ def main_object_detect(json_struct, video_path):
         for idx, image in enumerate(json_struct['images']):
             pipe = Popen(split_command,  stdin=PIPE, stdout=PIPE, stderr=PIPE)
             path = os.path.join(image_directory_path, image['image_name']) + '\n'
-            # path = '/home/ben/VideoUnderstanding/example_images/Animals6mins/images/full/Animals6mins-551.png'
             output, err = pipe.communicate(path)
 
             object_label_probs = output.split('\n')
@@ -47,10 +47,10 @@ def main_object_detect(json_struct, video_path):
                 object_label_probs[i] = {'class': split[0], 'score': split[1][1:]}
 
             log("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
+            # print ("Processed image {}/{} object detection in {}s".format(idx, num_images, time_for_prediction))
             if object_label_probs:
                 log('Objects detected: ', object_label_probs)
 
-            # TODO open predictions.png save in section other than full images!!!!
             # TODO open predictions.png save in section other than full images!!!!
 
             # if not image.get('object_lists'): #todo if testing yolo before rcnn
@@ -61,11 +61,14 @@ def main_object_detect(json_struct, video_path):
         json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
 
         end = timer()
-        log('YOLO Object Detection complete', header=HEADER_SIZE)
+        log('YOLO Object Detection complete', header=HEADER_SIZE, color='green')
         # log('Average Time taken per image: {}'.format(average_time_per_image))
-        log('Time taken:', round((end - start), 5), 'seconds')
+        log('Time taken for YOLO object detection:', round((end - start), 5), 'seconds', color='chartreuse')
 
-# main_object_detect('/home/ben/VideoUnderstanding/example_images/Animals6mins/Animals6mins.mp4')
+# json_struct_path = '/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/metadata/result_struct.json'
+# with open(json_struct_path) as data_file:
+#     json_struct = json.load(data_file)
+# main_object_detect(json_struct, '/home/ben/VideoUnderstanding/example_images/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People/Montage_-_The_Best_of_YouTubes_Mishaps_Involving_Ice_Snow_Cars_and_People.mp4')
 
 
 

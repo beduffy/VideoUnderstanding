@@ -305,5 +305,7 @@
                 //console.log('index:', i, ' curX:', currX);
                 //console.log('barWidth:', barWidth);
             }
+
+            $('#page-title').text(data.info.name);
         })
     }

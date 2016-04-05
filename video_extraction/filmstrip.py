@@ -311,7 +311,7 @@ def detect_scenes(cap, json_struct, data, verbose):
     log('')
     log('Keyframe ranges in order of frame number', color='lightblue')
     for i in all_scene_changes_by_frame_no:
-        log('keyframe_range', i['keyframe_range'], 'chi_diff: ', i['chi_diff'], 'sds over mean:', ['sds_over_mean'])
+        log('keyframe_range', i['keyframe_range'], 'chi_diff: ', i['chi_diff'], 'sds over mean:', i['sds_over_mean'])
     log('')
 
     log('Keyframe ranges in order of chi-difference', color='lightblue')
@@ -502,7 +502,7 @@ def process_video(sourcePath, destPath, name, json_struct, verbose=False, interv
     cap.release()
     cv2.destroyAllWindows()
 
-def main_separate_scenes(json_struct, video_path, verbose=True, multiplier=1.0):
+def main_separate_scenes(json_struct, video_path, video_url, verbose=True, multiplier=1.0):
     start = timer()
 
     directory = os.path.dirname(video_path)
@@ -514,6 +514,7 @@ def main_separate_scenes(json_struct, video_path, verbose=True, multiplier=1.0):
     json_struct['info']['name'] = name
     json_struct['info']['INITIAL_NUM_FRAMES_IN_SCENE'] = 5
     json_struct['info']['multiplier'] = multiplier
+    json_struct['info']['url'] = video_url
 
     makeOutputDirs(directory)
 
@@ -522,11 +523,11 @@ def main_separate_scenes(json_struct, video_path, verbose=True, multiplier=1.0):
     process_video(video_path, directory, name, json_struct, verbose)
 
     json_path = os.path.join(directory, 'metadata', 'result_struct.json')
-    json.dump(json_struct, open(json_path, 'w'), indent=4) #todo
+    json.dump(json_struct, open(json_path, 'w'), indent=4)
 
     #todo log info one at a time!!!!!!!!
     log("Video Info: ", json_struct['info'], color='green', header=HEADER_SIZE)
     log("Video scene and frame extraction complete.", color='green', header=HEADER_SIZE)
     log("Video separated into ", json_struct['info']['num_scenes'], " scenes.", color='green', header=HEADER_SIZE)
     end = timer()
-    log('Time taken:', round((end - start), 5), 'seconds.', color='chartreuse')
+    log('Time taken for scene separation and extracting relevant frames:', round((end - start), 5), 'seconds.', color='chartreuse')

@@ -27,12 +27,15 @@ import os
 from timeit import default_timer as timer
 import webbrowser
 # from python_features.faster_rcnn_VOC_object_detection import faster_rcnn_VOC_object_detection as fast_rcnn_20
+from python_features.faster_rcnn_VOC_object_detection import test_rcnn as faster_rcnn_20_detection
 from pytube import api, exceptions
 from pprint import pprint
 from utilities.globals import log, HEADER_SIZE
 import datetime, time
 
 def process_video(video_path, video_url, multiplier=1.0):
+    start = timer()
+
     #todo pass all below in one dictionary to save calculating every time?
     video_name = video_path.split('/')[-1][:-4]
     directory = os.path.dirname(video_path)
@@ -44,18 +47,18 @@ def process_video(video_path, video_url, multiplier=1.0):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
 
-    log('Processing video:', video_name, header=HEADER_SIZE)
+    log('Processing video:', video_name, header=1)
 
     # main processing sub functions ------------------
 
-    filmstrip.main_separate_scenes(json_struct, video_path, False, multiplier)
-    # fast_rcnn_20.main_object_detect(json_struct, video_path)
-    # scene_classification.main_scene_classification(json_struct, video_path)
+    # RENAME ALL FUNCTIONS AND TAKE SCREENSHOT TODO
+    # filmstrip.main_separate_scenes(json_struct, video_path, video_url, False, multiplier)
+    # faster_rcnn_20_detection.main_object_detect(json_struct, video_path)
     # yolo_object_detection.main_object_detect(json_struct, video_path)
-    scene_results.average_all_scene_results(json_struct, json_struct_path)
+    scene_classification.main_scene_classification(json_struct, video_path)
+    # scene_results.average_all_scene_results(json_struct, json_struct_path)
 
     # ---------------------------------
-    json_struct['info']['url'] = video_url
 
     # Open URL in a new tab, if a browser window is already open.
     log('Opening browser tab with results')
@@ -81,6 +84,16 @@ def process_video(video_path, video_url, multiplier=1.0):
                                           'last_processed_datetime': datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
 
     json.dump(all_videos_json, open(all_videos_json_path, 'w'), indent=4)
+
+    end = timer()
+    seconds = round(end - start, 0);
+    m, s = divmod(seconds, 60)
+    log('All processing completed', color='green', header=1)
+    log('TOTAL PROCESSING TIME TAKEN: ', "%02d:%02d" % (m, s), 'seconds.', color='chartreuse', header=1)
+    log('')
+    log('')
+
+
 
 def download_video(url,changed_name=None):
     yt = api.YouTube(url)
@@ -135,9 +148,9 @@ def download_video(url,changed_name=None):
 
     return yt.filename
 
-
+# from python_features.faster_rcnn_VOC_object_detection import test_rcnn
+# test_rcnn.testrcnn()
 # TODO show full json file in browser
-
 # process_video('/home/ben/VideoUnderstanding/example_images/Best_of_2015_Cute_Funny_Animals/Best_of_2015_Cute_Funny_Animals.mp4', 'https://www.youtube.com/watch?v=xv3l1Blx6JQ')
 
 # process_video('/home/ben/VideoUnderstanding/example_images/Walk_down_the_Times_Square_in_New_York/Walk_down_the_Times_Square_in_New_York.mp4', None)

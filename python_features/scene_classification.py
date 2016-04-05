@@ -10,16 +10,16 @@ import caffe
 from timeit import default_timer as timer
 from utilities.globals import log, HEADER_SIZE
 
-current_dir = os.path.dirname(__file__)
-parent_dir = os.path.dirname(current_dir)
-example_images = os.path.join(parent_dir, 'example_images')
+# current_dir = os.path.dirname(__file__)
+# parent_dir = os.path.dirname(current_dir)
+# example_images = os.path.join(parent_dir, 'example_images')
 
 def batch_scene_classification(video_path, models):
     plt.rcParams['figure.figsize'] = (10, 10)
     plt.rcParams['image.interpolation'] = 'nearest'
     plt.rcParams['image.cmap'] = 'gray'
 
-    caffe.set_mode_cpu()
+    caffe.set_mode_gpu()
 
     net0 = caffe.Net(models[0]['prototxt'], models[0]['caffemodel'], caffe.TEST)
     net1 = caffe.Net(models[1]['prototxt'], models[1]['caffemodel'], caffe.TEST)
@@ -87,7 +87,7 @@ def classify_scene(net, image_path):
     return top_results
 
 def main_scene_classification(json_struct, video_path):
-    log('Starting Scene Classification', header=HEADER_SIZE)
+    log('Main function. Starting Scene Classification', header=HEADER_SIZE - 1, color='darkturquoise')
     start = timer()
 
     places205model = {'prototxt' : '/home/ben/Downloads/placesCNN/places205CNN_deploy.prototxt', 'caffemodel' : '/home/ben/Downloads/placesCNN/places205CNN_iter_300000.caffemodel'}
@@ -100,8 +100,8 @@ def main_scene_classification(json_struct, video_path):
     batch_scene_classification(video_path, all_scene_models)
 
     end = timer()
-    log('Scene Classification complete', header=HEADER_SIZE)
-    log('Time taken:', round((end - start), 5), 'seconds')
+    log('Scene Classification complete', header=HEADER_SIZE, color='green')
+    log('Time taken for scene classification:', round((end - start), 5), 'seconds', color='chartreuse')
 
 # batch_scene_classification('old_example_images', places205model['prototxt'], places205model['caffemodel'])
 

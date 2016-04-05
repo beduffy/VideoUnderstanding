@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Video Results Page</title>
+	<title id="page-title">Video Results Page</title>
 	<link rel="stylesheet" type="text/css" href="video_results.css">
 </head>
 
@@ -69,14 +69,15 @@
 							<br>
 							<div class="object_list">
 								<h2>Object Lists</h2>
+                                <h3>Faster R-CNN</h3>
 								{{#each object_lists.faster_rcnn_20}}
 									<div>{{class}}: {{score}}</div>
 								{{/each}}
+                                <h3>YOLO</h3>
 								{{#each object_lists.yolo_20}}
 									<div>{{class}}: {{score}}</div>
 								{{/each}}
 							</div>
-							<!--todo jquery hide show advanced options / extra info!!!!!-->
                         </div>
 					</div>
 				</td>
@@ -123,22 +124,20 @@
     <td>
         <h1 id="video-title">{{info.name}}</h1>
         <div class="description">
-            <div>Number of frames: {{info.framecount}}</div>
-            <div>Number of images:  {{info.num_images}}</div>
-            <div>Number of scenes:  {{info.num_scenes}}</div>
-            <div>Images per scene: {{info.INITIAL_NUM_FRAMES_IN_SCENE}}</div>
+            <div>Number of frames: <span style="color:red;">{{info.framecount}}</span></div>
+            <div>Number of images:  <span style="color:red;">{{info.num_images}}</span></div>
+            <div>Number of scenes:  <span style="color:red;">{{info.num_scenes}}</span></div>
+            <div>Images per scene: <span style="color:red;">{{info.INITIAL_NUM_FRAMES_IN_SCENE}}</span></div>
 
-            <div>Multplier: {{info.multiplier}}</div>
-            <div>Scene change detected if image has chi-difference that is {{info.multiplier}} standard deviations over the mean.</div>
-            <div>This chi-difference equals: {{toFixed info.mean_plus_multiplier_times_sd 2}}</div>
+            <div>Standard deviation multplier: <span style="color:red;">{{info.multiplier}}</span></div>
+            <div>Scene change detected if image has chi-difference that is  <span style="color:red;">{{info.multiplier}}</span> standard deviations over the mean.</div>
+            <div>This chi-difference equals: <span style="color:red;">{{toFixed info.mean_plus_multiplier_times_sd 2}}</span></div>
 
-            <div>Standard deviations over mean: {{info.sds_over_mean}}</div>
-            <div>FPS: {{toFixed info.fps 2}}</div>
-            <div>Length: {{secondsToMinutes info.length}} minutes</div>
-            <div>Length: {{toFixed info.length 0}}</div>
-            <div>Resolution: {{info.width}}x{{info.height}}</div>
-            <div id="video-url">Youtube URL: {{info.url}}</div>
-            <div>Show average results of all scenes below. Show STATS!!!!</div>
+            <div>FPS: <span style="color:red;">{{toFixed info.fps 2}}</span></div>
+            <div>Length: <span style="color:red;">{{toFixed info.length 0}}s</span></div>
+            <div>Length: <span style="color:red;">{{secondsToMinutes info.length}} minutes</span></div>
+            <div>Resolution: <span style="color:red;">{{info.width}}x{{info.height}}</span></div>
+            <div id="video-url">Youtube URL: <span style="color:red;">{{info.url}}</span></div>
             <h2>Gif</h2>
             <div class="frame">
                 <img id="gif" class="img_frame" src="">

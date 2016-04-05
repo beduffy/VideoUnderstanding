@@ -1,6 +1,10 @@
 import json
+from timeit import default_timer as timer
+from utilities.globals import log, HEADER_SIZE
 
 def average_all_scene_results(json_struct, json_struct_path):
+    start = timer()
+    log('Main function. Averaging all results for a scene', header=HEADER_SIZE - 1, color='darkturquoise')
     json_struct['scenes'] = []
 
     #TODO so much horrible naming
@@ -37,6 +41,8 @@ def average_all_scene_results(json_struct, json_struct_path):
             # print '\n-------------------------------------\n-------------------------------------\nSCENE HAS CHANGED TO: ', current_scene_num, '\n-------------------------------------\n'
 
     json.dump(json_struct, open(json_struct_path, 'w'), indent=4)
+
+    end = timer()
 
 def average_scene_results(json_struct, all_averaged_results_for_scene, current_scene_num):
     if json_struct['info'].get('INITIAL_NUM_FRAMES_IN_SCENE'):
