@@ -151,7 +151,7 @@ def demo(net, image, json_struct, idx, num_images):
             print s
             faster_rcnn_20.append({'class': cls, 'score': str(round(score, 3))})
             cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255,0,0), 2)
-            cv2.putText(image, s, (5, 5 + number_of_detections * 20), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+            cv2.putText(image, s, (5, 5 + number_of_detections * 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
 
         #vis_detections(im, cls, dets, thresh=CONF_THRESH)
         #im = im[:, :, (2, 1, 0)]
@@ -160,9 +160,9 @@ def demo(net, image, json_struct, idx, num_images):
         print 'NOTHING FOUND'
 
     cv2.imshow('image', image)
-    #TODO TODO CHANGE TO 100-200 SO EASIER TO SEE FOR DEMO
+    #TODO TODO CHANGE wait key TO 100-200 SO EASIER TO SEE FOR DEMO
 
-    cv2.waitKey(1)
+    cv2.waitKey(350)
     json_struct['images'][idx]['object_lists'] = {}
     json_struct['images'][idx]['object_lists']['faster_rcnn_20'] = faster_rcnn_20
 

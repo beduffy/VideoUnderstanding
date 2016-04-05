@@ -49,14 +49,15 @@ def process_video(video_path, video_url, multiplier=1.0):
 
     log('Processing video:', video_name, header=1)
 
-    # main processing sub functions ------------------
+    # main functions to process video
+    # ---------------------------------
 
     # RENAME ALL FUNCTIONS AND TAKE SCREENSHOT TODO
-    # filmstrip.main_separate_scenes(json_struct, video_path, video_url, False, multiplier)
-    # scene_classification.main_scene_classification(json_struct, video_path)
-    # faster_rcnn_20_detection.main_object_detect(json_struct, video_path)
+    filmstrip.main_separate_scenes_and_extract_frames(json_struct, video_path, video_url, False, multiplier)
+    scene_classification.main_scene_classification(json_struct, video_path)
+    faster_rcnn_20_detection.main_object_detect(json_struct, video_path)
     yolo_object_detection.main_object_detect(json_struct, video_path)
-    scene_results.average_all_scene_results(json_struct, json_struct_path)
+    scene_results.main_average_all_scene_results(json_struct, json_struct_path)
 
     # ---------------------------------
 

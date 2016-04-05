@@ -1,8 +1,9 @@
 import json
 from timeit import default_timer as timer
 from utilities.globals import log, HEADER_SIZE
+import os
 
-def average_all_scene_results(json_struct, json_struct_path):
+def main_average_all_scene_results(json_struct, json_struct_path):
     start = timer()
     log('Main function. Averaging all results for a scene', header=HEADER_SIZE - 1, color='darkturquoise')
     json_struct['scenes'] = []
@@ -12,9 +13,16 @@ def average_all_scene_results(json_struct, json_struct_path):
     current_scene_num = 0
     all_averaged_results_for_scene = {'current_scene_scene_results': [[], []], 'current_scene_object_lists': {'yolo_20': [], 'faster_rcnn_20': []}, 'average_colour': []}
 
+    json_struct = {}
+    if os.path.isfile(json_struct_path):
+        with open(json_struct_path) as data_file:
+            json_struct = json.load(data_file)
+
     num_images = json_struct['info']['num_images']
+    # json.dumps(parsed, indent=4, sort_keys=True)
     for idx, image in enumerate(json_struct['images']):
         #todo replace all with .gets
+        print image
         scene_results1 = image['scene_results']['scene_results1']
         scene_results2 = image['scene_results']['scene_results2']
         object_list_YOLO = image['object_lists']['yolo_20']
@@ -109,12 +117,12 @@ def average_scene_results(json_struct, all_averaged_results_for_scene, current_s
     print 'class average score: '
     print class_average_score
 
-    class_occurrences_normalised = {}
-    for k, v in class_occurrences.iteritems():
-        class_occurrences_normalised[k] = class_occurrences[k] / num_images_in_scene
-
-    print 'class class_occurrences normalised per scene: '
-    print class_occurrences_normalised
+    # class_occurrences_normalised = {}
+    # for k, v in class_occurrences.iteritems():
+    #     class_occurrences_normalised[k] = class_occurrences[k] / num_images_in_scene
+    #
+    # print 'class class_occurrences normalised per scene: '
+    # print class_occurrences_normalised
 
     yolo_info_dict = {'class_occurrences': class_occurrences, 'class_average_score': class_average_score}
 
@@ -162,9 +170,7 @@ def average_scene_results(json_struct, all_averaged_results_for_scene, current_s
     json_struct['scenes'].append({'scene_num': current_scene_num,
                                   'average_colour': scene_average_rgb,
                                   'scene_classes': {'scene_results1': average_scene_classes1, 'scene_results2': average_scene_classes2},
-                                  'object_classes': [
-                                      {'yolo_20': yolo_info_dict},
-                                  {'faster_rcnn_20': faster_rcnn_info_dict}]}) #todo bug and show on webpage
+                                  'object_classes': {'yolo_20': yolo_info_dict, 'faster_rcnn_20': faster_rcnn_info_dict}}) #todo bug and show on webpage
 
     # json_struct['scenes'].append({'scene_num': current_scene_num,
     #                               'average_colour': scene_average_rgb})

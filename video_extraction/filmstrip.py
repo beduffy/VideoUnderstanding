@@ -502,7 +502,7 @@ def process_video(sourcePath, destPath, name, json_struct, verbose=False, interv
     cap.release()
     cv2.destroyAllWindows()
 
-def main_separate_scenes(json_struct, video_path, video_url, verbose=True, multiplier=1.0):
+def main_separate_scenes_and_extract_frames(json_struct, video_path, video_url, verbose=True, multiplier=1.0):
     start = timer()
 
     directory = os.path.dirname(video_path)
