@@ -6,7 +6,7 @@ import os
 def main_average_all_scene_results(json_struct, json_struct_path):
     start = timer()
     log('Main function. Averaging all results for a scene', header=HEADER_SIZE - 1, color='darkturquoise')
-    json_struct['scenes'] = []
+
 
     #TODO so much horrible naming
 
@@ -17,6 +17,8 @@ def main_average_all_scene_results(json_struct, json_struct_path):
     if os.path.isfile(json_struct_path):
         with open(json_struct_path) as data_file:
             json_struct = json.load(data_file)
+
+    json_struct['scenes'] = []
 
     num_images = json_struct['info']['num_images']
     # json.dumps(parsed, indent=4, sort_keys=True)
@@ -166,7 +168,6 @@ def average_scene_results(json_struct, all_averaged_results_for_scene, current_s
         scene_average_rgb[idx] = scene_average_rgb[idx] / num_images_in_scene
 
     # print 'average rgb: ', scene_average_rgb
-
     json_struct['scenes'].append({'scene_num': current_scene_num,
                                   'average_colour': scene_average_rgb,
                                   'scene_classes': {'scene_results1': average_scene_classes1, 'scene_results2': average_scene_classes2},

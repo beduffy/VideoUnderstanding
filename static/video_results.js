@@ -280,16 +280,17 @@
 
             // Scene average colours on scroll bar
             var currX = 0;
-            console.log('num_scenes:', data.scenes.length, 'allx len', allXs.length);
-            for (var i = 0; i < data.scenes.length; i++) {
+            var barWidth;
+            console.log('num_scenes:', data.info.num_scenes, 'allx len', allXs.length);
+            for (var i = 0; i < data.info.num_scenes; i++) {
                 var r = Math.round(data.scenes[i].average_colour[0]);
                 var g = Math.round(data.scenes[i].average_colour[1]);
                 var b = Math.round(data.scenes[i].average_colour[2]);
                 var fillColorString = "rgb(" + r + ", " + g + ", " + b + ")";
 
 
-                if (i + 1 < data.scenes.length) var barWidth = allXs[i + 1] - allXs[i] - sceneDividerWidth;
-                else var barWidth = allXs[i - 1 + 1] - allXs[i - 1] - sceneDividerWidth; //slighly fragile
+                if (i + 1 < data.scenes.length) barWidth = allXs[i + 1] - allXs[i] - sceneDividerWidth;
+                else barWidth = allXs[i - 1 + 1] - allXs[i - 1] - sceneDividerWidth; //slighly fragile
                 currX = allXs[i] + sceneDividerWidth;
 
                 var bar = $(document.createElementNS("http://www.w3.org/2000/svg", "rect")).attr({

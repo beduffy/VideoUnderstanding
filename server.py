@@ -4,7 +4,6 @@ import os
 import json
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for, send_file
 from flask_socketio import SocketIO, send, emit
-# from flask.ext.socketio import SocketIO
 import utilities.globals as globals
 from utilities.globals import log, HEADER_SIZE
 import thread
